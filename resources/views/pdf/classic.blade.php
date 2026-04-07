@@ -1,131 +1,88 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>{{ $application->tailored_resume['full_name'] ?? 'Resume' }}</title>
+<meta charset="utf-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: Arial, sans-serif; font-size: 10.5px; color: #1a1a1a; background: #fff; }
+.page { padding: 48px 52px; }
+.name { font-size: 26px; font-weight: bold; text-align: center; letter-spacing: 1px; color: #000; margin-bottom: 6px; }
+.contact { text-align: center; font-size: 9.5px; color: #555; letter-spacing: 0.5px; margin-bottom: 18px; }
+.divider { border: none; border-top: 2px solid #000; margin-bottom: 18px; }
+.section-header { font-size: 9px; font-weight: bold; letter-spacing: 2.5px; text-transform: uppercase; color: #000; border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-bottom: 12px; margin-top: 22px; }
+.summary { font-size: 10px; line-height: 1.7; color: #333; margin-bottom: 4px; }
+.exp-title { font-size: 11px; font-weight: bold; color: #000; }
+.exp-meta { font-size: 9.5px; color: #555; margin-bottom: 6px; }
+.exp-desc { font-size: 10px; line-height: 1.65; color: #444; }
+.exp-entry { margin-bottom: 16px; }
+.skills-grid { font-size: 10px; color: #333; line-height: 2.0; }
+.cover-page { padding: 48px 52px; page-break-before: always; }
+.cover-name { font-size: 20px; font-weight: bold; color: #000; margin-bottom: 4px; }
+.cover-contact { font-size: 9.5px; color: #555; margin-bottom: 4px; }
+.cover-hr { border: none; border-top: 1px solid #ccc; margin: 14px 0 20px; }
+.cover-date { font-size: 10px; color: #555; margin-bottom: 16px; }
+.cover-body { font-size: 10.5px; line-height: 1.75; color: #333; margin-bottom: 14px; }
+.cover-sign { font-size: 10.5px; color: #333; margin-top: 24px; }
+</style>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Times New Roman', 'Times', serif; background: #ffffff; color: #000000;">
+<body>
+<div class="page">
+<div class="name">{{ strtoupper($resume['full_name'] ?? $application->resume->full_name ?? '') }}</div>
+<div class="contact">{{ $resume['email'] ?? $application->resume->email }} &nbsp;&middot;&nbsp; {{ $resume['phone'] ?? $application->resume->phone }} &nbsp;&middot;&nbsp; {{ $resume['location'] ?? $application->resume->location }}</div>
+<hr class="divider">
 
-@php
-    $tr = $application->tailored_resume;
-@endphp
-
-{{-- ═══════════════════════════════════════════════════════════════════ --}}
-{{-- CLASSIC — Centered serif, ATS-friendly, black & white only          --}}
-{{-- ═══════════════════════════════════════════════════════════════════ --}}
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; border-collapse: collapse;">
-    <tr>
-        <td valign="top" style="padding: 54px 64px; vertical-align: top;">
-
-            {{-- ── Centered header ── --}}
-            <div style="text-align: center;">
-                <div style="font-size: 26px; font-weight: bold; color: #000000; line-height: 1.15; letter-spacing: 1px;">
-                    {{ strtoupper($tr['full_name'] ?? '') }}
-                </div>
-                <div style="font-size: 11px; color: #000000; margin-top: 8px; line-height: 1.5;">
-                    @php
-                        $contactBits = array_filter([$tr['email'] ?? null, $tr['phone'] ?? null, $tr['location'] ?? null]);
-                    @endphp
-                    {!! implode(' &nbsp;&middot;&nbsp; ', array_map('e', $contactBits)) !!}
-                </div>
-            </div>
-
-            {{-- Horizontal rule --}}
-            <div style="border-top: 1px solid #000000; margin-top: 16px; margin-bottom: 18px; height: 0; font-size: 0;">&nbsp;</div>
-
-            {{-- Summary --}}
-            @if (!empty($tr['summary']))
-                <div style="font-size: 11px; font-weight: bold; color: #000000; text-transform: uppercase; letter-spacing: 1.5px; text-align: center; margin-bottom: 8px;">Summary</div>
-                <div style="font-size: 11px; line-height: 1.6; color: #000000; text-align: justify;">{{ $tr['summary'] }}</div>
-                <div style="border-top: 1px solid #000000; margin-top: 16px; margin-bottom: 16px; height: 0; font-size: 0;">&nbsp;</div>
-            @endif
-
-            {{-- Experience --}}
-            @if (!empty($tr['work_experience']))
-                <div style="font-size: 11px; font-weight: bold; color: #000000; text-transform: uppercase; letter-spacing: 1.5px; text-align: center; margin-bottom: 12px;">Experience</div>
-
-                @foreach ($tr['work_experience'] as $job)
-                    <div style="margin-bottom: 14px;">
-                        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%;">
-                            <tr>
-                                <td valign="top" style="vertical-align: top;">
-                                    <span style="font-size: 12px; font-weight: bold; color: #000000;">{{ $job['title'] ?? '' }}</span>
-                                    @if (!empty($job['company']))
-                                        <span style="font-size: 12px; color: #000000;">, {{ $job['company'] }}</span>
-                                    @endif
-                                </td>
-                                <td valign="top" style="vertical-align: top; text-align: right; font-size: 11px; font-style: italic; color: #000000; white-space: nowrap;">
-                                    {{ $job['start_date'] ?? '' }}@if (!empty($job['end_date'])) &nbsp;&ndash;&nbsp; {{ $job['end_date'] }}@endif
-                                </td>
-                            </tr>
-                        </table>
-                        @if (!empty($job['description']))
-                            <div style="font-size: 11px; color: #000000; line-height: 1.6; margin-top: 4px;">{{ $job['description'] }}</div>
-                        @endif
-                    </div>
-                @endforeach
-
-                <div style="border-top: 1px solid #000000; margin-top: 16px; margin-bottom: 16px; height: 0; font-size: 0;">&nbsp;</div>
-            @endif
-
-            {{-- Education --}}
-            @if (!empty($tr['education']))
-                <div style="font-size: 11px; font-weight: bold; color: #000000; text-transform: uppercase; letter-spacing: 1.5px; text-align: center; margin-bottom: 12px;">Education</div>
-
-                @foreach ($tr['education'] as $edu)
-                    <div style="margin-bottom: 10px;">
-                        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%;">
-                            <tr>
-                                <td valign="top" style="vertical-align: top;">
-                                    <span style="font-size: 12px; font-weight: bold; color: #000000;">{{ $edu['degree'] ?? '' }}</span>
-                                    @if (!empty($edu['institution']))
-                                        <span style="font-size: 12px; color: #000000;">, {{ $edu['institution'] }}</span>
-                                    @endif
-                                </td>
-                                <td valign="top" style="vertical-align: top; text-align: right; font-size: 11px; font-style: italic; color: #000000; white-space: nowrap;">
-                                    @if (!empty($edu['year'])) {{ $edu['year'] }} @endif
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                @endforeach
-
-                <div style="border-top: 1px solid #000000; margin-top: 16px; margin-bottom: 16px; height: 0; font-size: 0;">&nbsp;</div>
-            @endif
-
-            {{-- Skills --}}
-            @if (!empty($tr['skills']))
-                <div style="font-size: 11px; font-weight: bold; color: #000000; text-transform: uppercase; letter-spacing: 1.5px; text-align: center; margin-bottom: 8px;">Skills</div>
-                <div style="font-size: 11px; color: #000000; line-height: 1.7; text-align: center;">
-                    {{ collect($tr['skills'])->filter()->implode(' · ') }}
-                </div>
-            @endif
-
-        </td>
-    </tr>
-</table>
-
-{{-- COVER LETTER --}}
-@if ($application->cover_letter)
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; border-collapse: collapse; page-break-before: always;">
-    <tr>
-        <td valign="top" style="padding: 54px 64px; vertical-align: top;">
-            <div style="text-align: center;">
-                <div style="font-size: 22px; font-weight: bold; color: #000000; letter-spacing: 1px;">{{ strtoupper($tr['full_name'] ?? '') }}</div>
-                <div style="font-size: 11px; color: #000000; margin-top: 6px;">
-                    @php
-                        $contactBits = array_filter([$tr['email'] ?? null, $tr['phone'] ?? null, $tr['location'] ?? null]);
-                    @endphp
-                    {!! implode(' &nbsp;&middot;&nbsp; ', array_map('e', $contactBits)) !!}
-                </div>
-            </div>
-            <div style="border-top: 1px solid #000000; margin-top: 16px; margin-bottom: 26px; height: 0; font-size: 0;">&nbsp;</div>
-            <div style="font-size: 11px; color: #000000; margin-bottom: 24px;">{{ now()->format('F j, Y') }}</div>
-            <div style="font-size: 12px; line-height: 1.7; color: #000000; white-space: pre-line;">{{ $application->cover_letter }}</div>
-        </td>
-    </tr>
-</table>
+@if($resume['summary'] ?? null)
+<div class="section-header">Summary</div>
+<div class="summary">{{ $resume['summary'] }}</div>
 @endif
 
+@if(!empty($resume['work_experience']))
+<div class="section-header">Experience</div>
+@foreach($resume['work_experience'] as $job)
+<div class="exp-entry">
+<table width="100%" cellpadding="0" cellspacing="0"><tr>
+<td><span class="exp-title">{{ $job['title'] ?? '' }}</span></td>
+<td align="right"><span style="font-size:9.5px;color:#555;">{{ $job['start_date'] ?? '' }}{{ isset($job['end_date']) ? ' &ndash; ' . $job['end_date'] : ' &ndash; Present' }}</span></td>
+</tr></table>
+<div class="exp-meta">{{ $job['company'] ?? '' }}</div>
+<div class="exp-desc">{{ $job['description'] ?? '' }}</div>
+</div>
+@endforeach
+@endif
+
+@if(!empty($resume['education']))
+<div class="section-header">Education</div>
+@foreach($resume['education'] as $edu)
+<div class="exp-entry">
+<table width="100%" cellpadding="0" cellspacing="0"><tr>
+<td><span class="exp-title">{{ $edu['degree'] ?? '' }}</span></td>
+<td align="right"><span style="font-size:9.5px;color:#555;">{{ $edu['year'] ?? '' }}</span></td>
+</tr></table>
+<div class="exp-meta">{{ $edu['institution'] ?? '' }}</div>
+</div>
+@endforeach
+@endif
+
+@if(!empty($resume['skills']))
+<div class="section-header">Skills</div>
+<div class="skills-grid">{!! implode(' &nbsp;&middot;&nbsp; ', array_map('e', array_filter($resume['skills']))) !!}</div>
+@endif
+</div>
+
+@if($coverLetter)
+<div class="cover-page">
+<div class="cover-name">{{ $resume['full_name'] ?? $application->resume->full_name }}</div>
+<div class="cover-contact">{{ $resume['email'] ?? $application->resume->email }} &nbsp;&middot;&nbsp; {{ $resume['phone'] ?? $application->resume->phone }}</div>
+<hr class="cover-hr">
+<div class="cover-date">{{ now()->format('F j, Y') }}</div>
+<div class="cover-body">Dear {{ $application->company_name }} Hiring Team,</div>
+@foreach(explode("\n\n", $coverLetter) as $paragraph)
+@if(trim($paragraph))
+<div class="cover-body">{{ trim($paragraph) }}</div>
+@endif
+@endforeach
+<div class="cover-sign">Sincerely,<br><br><strong>{{ $resume['full_name'] ?? $application->resume->full_name }}</strong><br>{{ $resume['email'] ?? $application->resume->email }} &nbsp;|&nbsp; {{ $resume['phone'] ?? $application->resume->phone }}</div>
+</div>
+@endif
 </body>
 </html>

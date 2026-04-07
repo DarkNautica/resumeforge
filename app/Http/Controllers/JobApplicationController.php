@@ -153,6 +153,9 @@ PROMPT;
 
         abort_if(empty($application->tailored_resume), 404, 'No tailored resume available.');
 
+        // Eager-load the base resume relationship for the templates
+        $application->load('resume');
+
         // Pick template (executive | modern | classic), default executive
         $allowed  = ['executive', 'modern', 'classic'];
         $template = in_array($request->query('template'), $allowed, true)
@@ -170,10 +173,14 @@ PROMPT;
         $application->tailored_resume = $cleaned['tailored_resume'];
         $application->cover_letter    = $cleaned['cover_letter'];
 
-        $pdf = Pdf::loadView("pdf.{$template}", compact('application'))
+        // Templates expect: $application, $resume (cleaned tailored array), $coverLetter (cleaned string)
+        $resume      = $cleaned['tailored_resume'];
+        $coverLetter = $cleaned['cover_letter'];
+
+        $pdf = Pdf::loadView("pdf.{$template}", compact('application', 'resume', 'coverLetter'))
             ->setPaper('a4', 'portrait');
 
-        $name     = $application->tailored_resume['full_name'] ?? 'resume';
+        $name     = $resume['full_name'] ?? 'resume';
         $company  = $application->company_name;
         $filename = Str::slug("{$name} {$company} {$template} resume") . '.pdf';
 
