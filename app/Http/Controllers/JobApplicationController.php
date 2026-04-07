@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\JobApplication;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class JobApplicationController extends Controller
 {
@@ -29,9 +32,13 @@ class JobApplicationController extends Controller
 
         $validated = $request->validate([
             'resume_id'       => 'required|exists:resumes,id',
-            'job_title'       => 'required|string|max:255',
-            'company_name'    => 'required|string|max:255',
-            'job_description' => 'required|string',
+            'job_title'       => 'required|string|max:100',
+            'company_name'    => 'required|string|max:100',
+            'job_description' => 'required|string|max:8000',
+        ], [
+            'job_title.max'       => 'Job title may not exceed 100 characters.',
+            'company_name.max'    => 'Company name may not exceed 100 characters.',
+            'job_description.max' => 'Job description may not exceed 8,000 characters. Try trimming the posting to the key requirements.',
         ]);
 
         // Ensure the selected resume belongs to the authenticated user
@@ -138,5 +145,21 @@ PROMPT;
         $application->load('resume');
 
         return view('applications.show', compact('application'));
+    }
+
+    public function downloadPdf(JobApplication $application): Response
+    {
+        $this->authorize('view', $application);
+
+        abort_if(empty($application->tailored_resume), 404, 'No tailored resume available.');
+
+        $pdf = Pdf::loadView('pdf.resume', compact('application'))
+            ->setPaper('a4', 'portrait');
+
+        $name     = $application->tailored_resume['full_name'] ?? 'resume';
+        $company  = $application->company_name;
+        $filename = Str::slug("{$name} {$company} resume") . '.pdf';
+
+        return $pdf->download($filename);
     }
 }

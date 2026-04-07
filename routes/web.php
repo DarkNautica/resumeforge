@@ -20,6 +20,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('resumes', ResumeController::class)->except(['index']);
     Route::resource('applications', JobApplicationController::class)->only(['create', 'store', 'show']);
+    Route::get('/applications/{application}/pdf', [JobApplicationController::class, 'downloadPdf'])->name('applications.pdf');
 
     // Billing
     Route::get('/plans', [SubscriptionController::class, 'plans'])->name('plans');
