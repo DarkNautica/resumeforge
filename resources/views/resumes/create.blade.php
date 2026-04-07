@@ -15,7 +15,7 @@
             <p class="mt-3 text-sm text-[#555]">This is your base resume. Claude will use it to tailor applications to specific jobs.</p>
         </div>
 
-        <form method="POST" action="{{ route('resumes.store') }}" x-data="resumeForm()" class="space-y-4">
+        <form method="POST" action="{{ route('resumes.store') }}" class="space-y-4">
             @csrf
 
             @if ($errors->any())
@@ -80,83 +80,93 @@
             </div>
 
             {{-- Section: Work Experience --}}
-            <div class="bg-[#111] border border-[#1f1f1f] rounded-xl overflow-hidden">
+            <div class="bg-[#111] border border-[#1f1f1f] rounded-xl overflow-hidden"
+                x-data="{
+                    positions: @js(old('work_experience', [])),
+                    addPosition() { this.positions.push({ title: '', company: '', start_date: '', end_date: '', description: '' }) },
+                    removePosition(i) { this.positions.splice(i, 1) }
+                }">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-[#1a1a1a]">
                     <div class="flex items-center gap-3">
                         <span class="text-xs font-mono text-volt">02</span>
                         <h2 class="text-xs font-semibold text-[#f0ece4] uppercase tracking-widest">Work Experience</h2>
                     </div>
-                    <button type="button" @click="addJob()"
-                        class="text-xs font-semibold text-volt hover:underline">+ Add position</button>
+                    <button type="button" @click="addPosition()"
+                        class="text-xs font-semibold text-volt hover:underline">+ Add Position</button>
                 </div>
                 <div class="p-6 space-y-4">
-                    <template x-for="(job, index) in jobs" :key="index">
+                    <template x-for="(pos, i) in positions" :key="i">
                         <div class="bg-[#0d0d0d] border border-[#222] rounded-lg p-5 space-y-4 relative">
-                            <button type="button" @click="removeJob(index)"
+                            <button type="button" @click="removePosition(i)"
                                 class="absolute top-4 right-4 text-[#333] hover:text-[#ff5555] transition text-lg leading-none">&times;</button>
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-medium text-[#555] uppercase tracking-widest mb-2">Job Title</label>
-                                    <input type="text" :name="`work_experience[${index}][title]`" x-model="job.title"
+                                    <input type="text" :name="'work_experience[' + i + '][title]'" x-model="pos.title"
                                         class="w-full bg-[#111] border border-[#2a2a2a] rounded-lg px-3 py-2.5 text-[#f0ece4] text-sm focus:outline-none focus:border-volt transition">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-[#555] uppercase tracking-widest mb-2">Company</label>
-                                    <input type="text" :name="`work_experience[${index}][company]`" x-model="job.company"
+                                    <input type="text" :name="'work_experience[' + i + '][company]'" x-model="pos.company"
                                         class="w-full bg-[#111] border border-[#2a2a2a] rounded-lg px-3 py-2.5 text-[#f0ece4] text-sm focus:outline-none focus:border-volt transition">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-[#555] uppercase tracking-widest mb-2">Start Date</label>
-                                    <input type="text" :name="`work_experience[${index}][start_date]`" x-model="job.start_date" placeholder="Jan 2020"
+                                    <input type="text" :name="'work_experience[' + i + '][start_date]'" x-model="pos.start_date" placeholder="Jan 2020"
                                         class="w-full bg-[#111] border border-[#2a2a2a] rounded-lg px-3 py-2.5 text-[#f0ece4] text-sm focus:outline-none focus:border-volt transition">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-[#555] uppercase tracking-widest mb-2">End Date</label>
-                                    <input type="text" :name="`work_experience[${index}][end_date]`" x-model="job.end_date" placeholder="Present"
+                                    <input type="text" :name="'work_experience[' + i + '][end_date]'" x-model="pos.end_date" placeholder="Present"
                                         class="w-full bg-[#111] border border-[#2a2a2a] rounded-lg px-3 py-2.5 text-[#f0ece4] text-sm focus:outline-none focus:border-volt transition">
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-[#555] uppercase tracking-widest mb-2">Description / Achievements</label>
-                                <textarea :name="`work_experience[${index}][description]`" x-model="job.description" rows="3"
+                                <textarea :name="'work_experience[' + i + '][description]'" x-model="pos.description" rows="3"
                                     class="w-full bg-[#111] border border-[#2a2a2a] rounded-lg px-3 py-2.5 text-[#f0ece4] text-sm focus:outline-none focus:border-volt transition resize-none"></textarea>
                             </div>
                         </div>
                     </template>
-                    <p x-show="jobs.length === 0" class="text-sm text-[#333] italic py-2">No positions added yet.</p>
+                    <p x-show="positions.length === 0" class="text-sm text-[#333] italic py-2">No positions added yet.</p>
                 </div>
             </div>
 
             {{-- Section: Education --}}
-            <div class="bg-[#111] border border-[#1f1f1f] rounded-xl overflow-hidden">
+            <div class="bg-[#111] border border-[#1f1f1f] rounded-xl overflow-hidden"
+                x-data="{
+                    educations: @js(old('education', [])),
+                    addEducation() { this.educations.push({ degree: '', institution: '', year: '' }) },
+                    removeEducation(i) { this.educations.splice(i, 1) }
+                }">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-[#1a1a1a]">
                     <div class="flex items-center gap-3">
                         <span class="text-xs font-mono text-volt">03</span>
                         <h2 class="text-xs font-semibold text-[#f0ece4] uppercase tracking-widest">Education</h2>
                     </div>
-                    <button type="button" @click="addEdu()"
-                        class="text-xs font-semibold text-volt hover:underline">+ Add education</button>
+                    <button type="button" @click="addEducation()"
+                        class="text-xs font-semibold text-volt hover:underline">+ Add Education</button>
                 </div>
                 <div class="p-6 space-y-4">
-                    <template x-for="(edu, index) in educations" :key="index">
+                    <template x-for="(edu, i) in educations" :key="i">
                         <div class="bg-[#0d0d0d] border border-[#222] rounded-lg p-5 relative">
-                            <button type="button" @click="removeEdu(index)"
+                            <button type="button" @click="removeEducation(i)"
                                 class="absolute top-4 right-4 text-[#333] hover:text-[#ff5555] transition text-lg leading-none">&times;</button>
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div class="sm:col-span-2">
                                     <label class="block text-xs font-medium text-[#555] uppercase tracking-widest mb-2">Degree</label>
-                                    <input type="text" :name="`education[${index}][degree]`" x-model="edu.degree" placeholder="B.S. Computer Science"
+                                    <input type="text" :name="'education[' + i + '][degree]'" x-model="edu.degree" placeholder="B.S. Computer Science"
                                         class="w-full bg-[#111] border border-[#2a2a2a] rounded-lg px-3 py-2.5 text-[#f0ece4] text-sm focus:outline-none focus:border-volt transition">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-[#555] uppercase tracking-widest mb-2">Year</label>
-                                    <input type="text" :name="`education[${index}][year]`" x-model="edu.year" placeholder="2018"
+                                    <input type="text" :name="'education[' + i + '][year]'" x-model="edu.year" placeholder="2018"
                                         class="w-full bg-[#111] border border-[#2a2a2a] rounded-lg px-3 py-2.5 text-[#f0ece4] text-sm focus:outline-none focus:border-volt transition">
                                 </div>
                                 <div class="sm:col-span-3">
                                     <label class="block text-xs font-medium text-[#555] uppercase tracking-widest mb-2">Institution</label>
-                                    <input type="text" :name="`education[${index}][institution]`" x-model="edu.institution"
+                                    <input type="text" :name="'education[' + i + '][institution]'" x-model="edu.institution"
                                         class="w-full bg-[#111] border border-[#2a2a2a] rounded-lg px-3 py-2.5 text-[#f0ece4] text-sm focus:outline-none focus:border-volt transition">
                                 </div>
                             </div>
@@ -167,22 +177,27 @@
             </div>
 
             {{-- Section: Skills --}}
-            <div class="bg-[#111] border border-[#1f1f1f] rounded-xl overflow-hidden">
+            <div class="bg-[#111] border border-[#1f1f1f] rounded-xl overflow-hidden"
+                x-data="{
+                    skills: @js(old('skills', [])),
+                    addSkill() { this.skills.push('') },
+                    removeSkill(i) { this.skills.splice(i, 1) }
+                }">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-[#1a1a1a]">
                     <div class="flex items-center gap-3">
                         <span class="text-xs font-mono text-volt">04</span>
                         <h2 class="text-xs font-semibold text-[#f0ece4] uppercase tracking-widest">Skills</h2>
                     </div>
                     <button type="button" @click="addSkill()"
-                        class="text-xs font-semibold text-volt hover:underline">+ Add skill</button>
+                        class="text-xs font-semibold text-volt hover:underline">+ Add Skill</button>
                 </div>
                 <div class="p-6">
                     <div class="flex flex-wrap gap-2" x-show="skills.length > 0">
-                        <template x-for="(skill, index) in skills" :key="index">
+                        <template x-for="(skill, i) in skills" :key="i">
                             <div class="flex items-center gap-1.5 bg-[#0d0d0d] border border-[#2a2a2a] rounded-lg pl-3 pr-2 py-1.5">
-                                <input type="text" :name="`skills[${index}]`" x-model="skills[index]"
+                                <input type="text" :name="'skills[' + i + ']'" x-model="skills[i]"
                                     class="bg-transparent text-sm text-[#f0ece4] w-24 focus:outline-none">
-                                <button type="button" @click="removeSkill(index)"
+                                <button type="button" @click="removeSkill(i)"
                                     class="text-[#333] hover:text-[#ff5555] transition text-base leading-none">&times;</button>
                             </div>
                         </template>
@@ -202,23 +217,4 @@
         </form>
     </div>
 
-    <script>
-        function resumeForm() {
-            return {
-                jobs: @json(old('work_experience', [])),
-                educations: @json(old('education', [])),
-                skills: @json(old('skills', [])),
-                addJob() {
-                    this.jobs.push({ title: '', company: '', start_date: '', end_date: '', description: '' });
-                },
-                removeJob(i) { this.jobs.splice(i, 1); },
-                addEdu() {
-                    this.educations.push({ degree: '', institution: '', year: '' });
-                },
-                removeEdu(i) { this.educations.splice(i, 1); },
-                addSkill() { this.skills.push(''); },
-                removeSkill(i) { this.skills.splice(i, 1); },
-            };
-        }
-    </script>
 </x-app-layout>

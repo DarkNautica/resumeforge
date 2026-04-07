@@ -14,6 +14,10 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        <!-- Alpine.js -->
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+        <style>[x-cloak] { display: none !important; }</style>
     </head>
     <body class="font-sans antialiased bg-[#0a0a0a] text-[#f0ece4]">
         @include('layouts.navigation')

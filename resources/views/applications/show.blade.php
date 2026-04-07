@@ -78,13 +78,41 @@
                                 <div class="w-1 h-5 bg-volt rounded-full"></div>
                                 <h2 class="text-xs font-semibold text-[#f0ece4] uppercase tracking-widest">Tailored Resume</h2>
                             </div>
-                            <a href="{{ route('applications.pdf', $application) }}"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-volt text-black text-xs font-semibold rounded-lg hover:bg-[#b3e600] transition">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                                </svg>
-                                Download PDF
-                            </a>
+                            <div x-data="{ pdfLoading: false }">
+                                <a href="{{ route('applications.pdf', $application) }}"
+                                    @click="pdfLoading = true; setTimeout(() => pdfLoading = false, 4000)"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-volt text-black text-xs font-semibold rounded-lg hover:bg-[#b3e600] transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                    </svg>
+                                    Download PDF
+                                </a>
+
+                                {{-- PDF generation modal --}}
+                                <div x-show="pdfLoading" x-cloak
+                                    x-transition:enter="transition ease-out duration-200"
+                                    x-transition:enter-start="opacity-0"
+                                    x-transition:enter-end="opacity-100"
+                                    class="fixed inset-0 z-[9999] flex items-center justify-center"
+                                    style="background-color: rgba(0,0,0,0.85); display: none;">
+
+                                    <div class="bg-[#111] border border-[#1f1f1f] rounded-2xl px-12 py-10 text-center max-w-sm mx-6"
+                                         style="box-shadow: 0 0 60px rgba(200,255,0,0.15);">
+
+                                        {{-- Spinner --}}
+                                        <div class="w-14 h-14 mx-auto mb-6 relative">
+                                            <div class="absolute inset-0 rounded-full border-2 border-[#1f1f1f]"></div>
+                                            <div class="absolute inset-0 rounded-full border-2 border-volt border-t-transparent animate-spin"></div>
+                                        </div>
+
+                                        <p class="font-heading text-2xl text-[#f0ece4] tracking-wide mb-2">POLISHING</p>
+                                        <p class="text-sm text-[#888] leading-relaxed">
+                                            Claude is polishing your resume<span class="inline-block animate-pulse">…</span>
+                                        </p>
+                                        <p class="text-xs text-[#444] mt-4">This usually takes a few seconds</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="p-7 space-y-6">

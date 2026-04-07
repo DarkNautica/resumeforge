@@ -153,6 +153,17 @@ PROMPT;
 
         abort_if(empty($application->tailored_resume), 404, 'No tailored resume available.');
 
+        // Run a quality-check pass through Claude before rendering. Falls back
+        // to the stored data silently if anything goes wrong.
+        $cleaned = $this->qualityCheck(
+            $application->tailored_resume,
+            $application->cover_letter ?? ''
+        );
+
+        // Apply cleaned data to the in-memory model only — never persisted.
+        $application->tailored_resume = $cleaned['tailored_resume'];
+        $application->cover_letter    = $cleaned['cover_letter'];
+
         $pdf = Pdf::loadView('pdf.resume', compact('application'))
             ->setPaper('a4', 'portrait');
 
@@ -161,5 +172,67 @@ PROMPT;
         $filename = Str::slug("{$name} {$company} resume") . '.pdf';
 
         return $pdf->download($filename);
+    }
+
+    /**
+     * Run a Claude polish pass on the stored resume + cover letter.
+     * Returns the cleaned version, or the original input on any failure.
+     */
+    private function qualityCheck(array $tailoredResume, string $coverLetter): array
+    {
+        $fallback = [
+            'tailored_resume' => $tailoredResume,
+            'cover_letter'    => $coverLetter,
+        ];
+
+        try {
+            $systemPrompt = 'You are a professional resume editor. Review this resume and cover letter for any formatting issues, awkward phrasing, or inconsistencies. Return a corrected version as a JSON object with keys tailored_resume (same structure as input) and cover_letter (cleaned text). Make only necessary improvements, do not change factual content.';
+
+            $userMessage = json_encode([
+                'tailored_resume' => $tailoredResume,
+                'cover_letter'    => $coverLetter,
+            ], JSON_PRETTY_PRINT);
+
+            $response = Http::withHeaders([
+                'x-api-key'         => config('services.anthropic.key'),
+                'anthropic-version' => '2023-06-01',
+                'content-type'      => 'application/json',
+            ])->post('https://api.anthropic.com/v1/messages', [
+                'model'      => 'claude-sonnet-4-6',
+                'max_tokens' => 4000,
+                'system'     => $systemPrompt,
+                'messages'   => [
+                    ['role' => 'user', 'content' => $userMessage],
+                ],
+            ]);
+
+            if (! $response->successful()) {
+                return $fallback;
+            }
+
+            $rawText = $response->json('content.0.text');
+            if (! is_string($rawText)) {
+                return $fallback;
+            }
+
+            // Strip accidental markdown code fences
+            $rawText = preg_replace('/^```(?:json)?\s*/i', '', trim($rawText));
+            $rawText = preg_replace('/\s*```$/', '', $rawText);
+
+            $parsed = json_decode(trim($rawText), true);
+
+            if (! is_array($parsed)
+                || ! isset($parsed['tailored_resume'], $parsed['cover_letter'])
+                || ! is_array($parsed['tailored_resume'])
+                || ! is_string($parsed['cover_letter'])
+            ) {
+                return $fallback;
+            }
+
+            return $parsed;
+        } catch (\Throwable $e) {
+            \Log::warning('PDF quality check failed, using stored data', ['error' => $e->getMessage()]);
+            return $fallback;
+        }
     }
 }
