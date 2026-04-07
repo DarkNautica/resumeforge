@@ -1,163 +1,196 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <div>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    {{ $application->job_title }} at {{ $application->company_name }}
-                </h2>
-                <p class="text-sm text-gray-500 mt-0.5">Based on: {{ $application->resume->title ?? '—' }}</p>
+    <div class="max-w-5xl mx-auto px-6 py-12 space-y-8">
+
+        {{-- Header --}}
+        <div class="flex items-start justify-between gap-6">
+            <div class="min-w-0">
+                <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-1.5 text-xs text-[#555] hover:text-[#f0ece4] transition mb-4">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                    Dashboard
+                </a>
+                <h1 class="font-heading text-4xl text-[#f0ece4] leading-none truncate">
+                    {{ strtoupper($application->job_title) }}
+                </h1>
+                <p class="mt-2 text-sm text-[#555]">
+                    {{ $application->company_name }}
+                    @if ($application->resume)
+                        <span class="text-[#333]">&middot;</span>
+                        <span class="text-[#444]">{{ $application->resume->title }}</span>
+                    @endif
+                </p>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="shrink-0 pt-9">
                 @php
-                    $badge = match($application->status) {
-                        'complete'   => 'bg-green-100 text-green-700',
-                        'processing' => 'bg-yellow-100 text-yellow-700',
-                        'failed'     => 'bg-red-100 text-red-700',
-                        default      => 'bg-gray-100 text-gray-600',
+                    $badgeClass = match($application->status) {
+                        'complete'   => 'bg-[#0d2600] text-volt border border-[#1a4a00]',
+                        'processing' => 'bg-[#1a1400] text-[#ffcc00] border border-[#332800]',
+                        'failed'     => 'bg-[#1a0000] text-[#ff5555] border border-[#330000]',
+                        default      => 'bg-[#111] text-[#555] border border-[#2a2a2a]',
                     };
                 @endphp
-                <span class="inline-block px-3 py-1 rounded-full text-sm font-medium {{ $badge }}">
+                <span class="inline-block px-3 py-1 rounded-lg text-xs font-semibold {{ $badgeClass }}">
                     {{ ucfirst($application->status) }}
                 </span>
             </div>
         </div>
-    </x-slot>
 
-    <div class="py-10">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        {{-- Status states --}}
+        @if ($application->status === 'pending' || $application->status === 'processing')
+            <div class="bg-[#111] border border-[#1f1f1f] rounded-xl p-10 text-center">
+                <div class="w-12 h-12 bg-[#1a1400] border border-[#332800] rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-5 h-5 text-[#ffcc00] animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                </div>
+                <p class="font-semibold text-[#f0ece4] mb-1">Generating your tailored resume…</p>
+                <p class="text-sm text-[#555]">Claude is rewriting your resume for this role. Refresh in a moment.</p>
+            </div>
 
-            @if (session('info'))
-                <div class="bg-blue-50 border border-blue-200 text-blue-800 rounded-md px-4 py-3 text-sm">
-                    {{ session('info') }}
+        @elseif ($application->status === 'failed')
+            <div class="bg-[#111] border border-[#1f1f1f] rounded-xl p-10 text-center">
+                <div class="w-12 h-12 bg-[#1a0000] border border-[#330000] rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-5 h-5 text-[#ff5555]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
                 </div>
-            @endif
+                <p class="font-semibold text-[#f0ece4] mb-1">Generation failed</p>
+                <p class="text-sm text-[#555] mb-5">Something went wrong while contacting Claude. Please try again.</p>
+                <a href="{{ route('applications.create', ['resume_id' => $application->resume_id]) }}"
+                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-volt text-black text-sm font-semibold rounded-lg hover:bg-[#b3e600] transition">
+                    Try Again
+                </a>
+            </div>
 
-            @if ($application->status === 'pending' || $application->status === 'processing')
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-                    <p class="text-yellow-800 font-medium">Your tailored resume is being generated…</p>
-                    <p class="text-yellow-600 text-sm mt-1">Refresh this page in a moment to see the results.</p>
-                </div>
-            @elseif ($application->status === 'failed')
-                <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-                    <p class="text-red-800 font-medium">Something went wrong while generating your resume.</p>
-                    <p class="text-red-600 text-sm mt-1">Please try creating a new application.</p>
-                </div>
-            @else
-                {{-- Tailored Resume --}}
+        @else
+            {{-- Main content: Resume + Cover Letter --}}
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+                {{-- Tailored Resume (3/5) --}}
                 @if (!empty($application->tailored_resume))
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6">
-                        <div class="flex items-center justify-between">
-                            <h3 class="font-semibold text-gray-900 text-lg">Tailored Resume</h3>
-                            {{-- PDF download button will go here --}}
-                            <button class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition opacity-50 cursor-not-allowed" disabled title="PDF export coming soon">
+                    @php $tr = $application->tailored_resume; @endphp
+                    <div class="lg:col-span-3 space-y-0 bg-[#111] border border-[#1f1f1f] rounded-xl overflow-hidden">
+                        {{-- Resume header bar --}}
+                        <div class="flex items-center justify-between px-6 py-4 border-b border-[#1a1a1a]">
+                            <div class="flex items-center gap-3">
+                                <div class="w-1 h-5 bg-volt rounded-full"></div>
+                                <h2 class="text-xs font-semibold text-[#f0ece4] uppercase tracking-widest">Tailored Resume</h2>
+                            </div>
+                            <button disabled title="PDF export coming soon"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-[#2a2a2a] text-[#333] text-xs font-medium rounded-lg cursor-not-allowed">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                </svg>
                                 Download PDF
                             </button>
                         </div>
 
-                        @php $tr = $application->tailored_resume; @endphp
-
-                        {{-- Contact --}}
-                        <div>
-                            <h4 class="text-xl font-bold text-gray-900">{{ $tr['full_name'] ?? '' }}</h4>
-                            <div class="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500">
-                                @if (!empty($tr['email'])) <span>{{ $tr['email'] }}</span> @endif
-                                @if (!empty($tr['phone'])) <span>{{ $tr['phone'] }}</span> @endif
-                                @if (!empty($tr['location'])) <span>{{ $tr['location'] }}</span> @endif
-                            </div>
-                        </div>
-
-                        @if (!empty($tr['summary']))
+                        <div class="p-7 space-y-6">
+                            {{-- Contact --}}
                             <div>
-                                <h5 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Summary</h5>
-                                <p class="text-sm text-gray-700 leading-relaxed">{{ $tr['summary'] }}</p>
+                                <h3 class="text-xl font-semibold text-[#f0ece4]">{{ $tr['full_name'] ?? '' }}</h3>
+                                <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#555]">
+                                    @if (!empty($tr['email'])) <span>{{ $tr['email'] }}</span> @endif
+                                    @if (!empty($tr['phone'])) <span>{{ $tr['phone'] }}</span> @endif
+                                    @if (!empty($tr['location'])) <span>{{ $tr['location'] }}</span> @endif
+                                </div>
                             </div>
-                        @endif
 
-                        @if (!empty($tr['work_experience']))
-                            <div>
-                                <h5 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Work Experience</h5>
-                                <div class="space-y-4">
-                                    @foreach ($tr['work_experience'] as $job)
-                                        <div>
-                                            <div class="flex items-start justify-between">
-                                                <div>
-                                                    <p class="font-medium text-gray-900">{{ $job['title'] ?? '' }}</p>
-                                                    <p class="text-sm text-gray-600">{{ $job['company'] ?? '' }}</p>
+                            @if (!empty($tr['summary']))
+                                <div class="border-t border-[#1a1a1a] pt-5">
+                                    <p class="text-xs font-semibold text-volt uppercase tracking-widest mb-2">Summary</p>
+                                    <p class="text-sm text-[#888] leading-relaxed">{{ $tr['summary'] }}</p>
+                                </div>
+                            @endif
+
+                            @if (!empty($tr['work_experience']))
+                                <div class="border-t border-[#1a1a1a] pt-5">
+                                    <p class="text-xs font-semibold text-volt uppercase tracking-widest mb-4">Experience</p>
+                                    <div class="space-y-5">
+                                        @foreach ($tr['work_experience'] as $job)
+                                            <div class="{{ !$loop->last ? 'pb-5 border-b border-[#161616]' : '' }}">
+                                                <div class="flex items-start justify-between gap-3">
+                                                    <div>
+                                                        <p class="font-medium text-[#f0ece4] text-sm">{{ $job['title'] ?? '' }}</p>
+                                                        <p class="text-xs text-[#555] mt-0.5">{{ $job['company'] ?? '' }}</p>
+                                                    </div>
+                                                    <p class="text-xs text-[#444] whitespace-nowrap shrink-0 mt-0.5">
+                                                        {{ $job['start_date'] ?? '' }}{{ isset($job['end_date']) ? ' – '.$job['end_date'] : '' }}
+                                                    </p>
                                                 </div>
-                                                <p class="text-sm text-gray-400 whitespace-nowrap ml-4">
-                                                    {{ $job['start_date'] ?? '' }}{{ isset($job['end_date']) ? ' – '.$job['end_date'] : '' }}
-                                                </p>
+                                                @if (!empty($job['description']))
+                                                    <p class="mt-2 text-xs text-[#666] leading-relaxed">{{ $job['description'] }}</p>
+                                                @endif
                                             </div>
-                                            @if (!empty($job['description']))
-                                                <p class="mt-1.5 text-sm text-gray-600 leading-relaxed">{{ $job['description'] }}</p>
-                                            @endif
-                                        </div>
-                                    @endforeach
+                                        @endforeach
+                                    </div>
                                 </div>
-                            </div>
-                        @endif
+                            @endif
 
-                        @if (!empty($tr['education']))
-                            <div>
-                                <h5 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Education</h5>
-                                <div class="space-y-2">
-                                    @foreach ($tr['education'] as $edu)
-                                        <div class="flex items-start justify-between">
-                                            <div>
-                                                <p class="font-medium text-gray-900">{{ $edu['degree'] ?? '' }}</p>
-                                                <p class="text-sm text-gray-600">{{ $edu['institution'] ?? '' }}</p>
+                            @if (!empty($tr['education']))
+                                <div class="border-t border-[#1a1a1a] pt-5">
+                                    <p class="text-xs font-semibold text-volt uppercase tracking-widest mb-4">Education</p>
+                                    <div class="space-y-3">
+                                        @foreach ($tr['education'] as $edu)
+                                            <div class="flex items-start justify-between gap-3">
+                                                <div>
+                                                    <p class="font-medium text-[#f0ece4] text-sm">{{ $edu['degree'] ?? '' }}</p>
+                                                    <p class="text-xs text-[#555] mt-0.5">{{ $edu['institution'] ?? '' }}</p>
+                                                </div>
+                                                @if (!empty($edu['year']))
+                                                    <p class="text-xs text-[#444] shrink-0">{{ $edu['year'] }}</p>
+                                                @endif
                                             </div>
-                                            @if (!empty($edu['year']))
-                                                <p class="text-sm text-gray-400 ml-4">{{ $edu['year'] }}</p>
-                                            @endif
-                                        </div>
-                                    @endforeach
+                                        @endforeach
+                                    </div>
                                 </div>
-                            </div>
-                        @endif
+                            @endif
 
-                        @if (!empty($tr['skills']))
-                            <div>
-                                <h5 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Skills</h5>
-                                <div class="flex flex-wrap gap-2">
-                                    @foreach ($tr['skills'] as $skill)
-                                        @if ($skill)
-                                            <span class="inline-block bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full px-3 py-0.5 text-sm">{{ $skill }}</span>
-                                        @endif
-                                    @endforeach
+                            @if (!empty($tr['skills']))
+                                <div class="border-t border-[#1a1a1a] pt-5">
+                                    <p class="text-xs font-semibold text-volt uppercase tracking-widest mb-3">Skills</p>
+                                    <div class="flex flex-wrap gap-1.5">
+                                        @foreach ($tr['skills'] as $skill)
+                                            @if ($skill)
+                                                <span class="px-2.5 py-1 bg-[#0d0d0d] border border-[#2a2a2a] text-[#777] text-xs rounded-md">{{ $skill }}</span>
+                                            @endif
+                                        @endforeach
+                                    </div>
                                 </div>
-                            </div>
-                        @endif
+                            @endif
+                        </div>
                     </div>
                 @endif
 
-                {{-- Cover Letter --}}
+                {{-- Cover Letter (2/5) --}}
                 @if ($application->cover_letter)
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="font-semibold text-gray-900 text-lg">Cover Letter</h3>
+                    <div class="lg:col-span-2 bg-[#111] border border-[#1f1f1f] rounded-xl overflow-hidden flex flex-col">
+                        <div class="flex items-center gap-3 px-6 py-4 border-b border-[#1a1a1a] shrink-0">
+                            <div class="w-1 h-5 bg-volt rounded-full"></div>
+                            <h2 class="text-xs font-semibold text-[#f0ece4] uppercase tracking-widest">Cover Letter</h2>
                         </div>
-                        <div class="prose prose-sm max-w-none text-gray-700 whitespace-pre-line leading-relaxed">
-                            {{ $application->cover_letter }}
+                        <div class="p-7 flex-1 overflow-y-auto">
+                            <div class="text-sm text-[#888] leading-7 whitespace-pre-line">{{ $application->cover_letter }}</div>
                         </div>
                     </div>
                 @endif
-            @endif
-
-            {{-- Original Job Description --}}
-            <details class="bg-white rounded-lg shadow-sm border border-gray-200">
-                <summary class="px-6 py-4 text-sm font-medium text-gray-700 cursor-pointer select-none">
-                    View Original Job Description
-                </summary>
-                <div class="px-6 pb-5 text-sm text-gray-600 whitespace-pre-line leading-relaxed border-t border-gray-100 pt-4">
-                    {{ $application->job_description }}
-                </div>
-            </details>
-
-            <div class="flex justify-start">
-                <a href="{{ route('dashboard') }}" class="text-sm text-gray-500 hover:underline">&larr; Back to dashboard</a>
             </div>
+        @endif
 
-        </div>
+        {{-- Original Job Description (collapsible) --}}
+        <details class="group bg-[#111] border border-[#1f1f1f] rounded-xl overflow-hidden">
+            <summary class="flex items-center justify-between px-6 py-4 cursor-pointer select-none list-none text-xs font-semibold text-[#555] hover:text-[#888] transition uppercase tracking-widest">
+                <span>Original Job Description</span>
+                <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </summary>
+            <div class="px-6 pb-6 pt-4 border-t border-[#1a1a1a] text-sm text-[#555] whitespace-pre-line leading-relaxed">
+                {{ $application->job_description }}
+            </div>
+        </details>
+
     </div>
 </x-app-layout>
