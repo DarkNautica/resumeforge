@@ -10,6 +10,7 @@ use Illuminate\View\View;
 use Stripe\Checkout\Session;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\Stripe;
+use Stripe\Subscription as StripeSubscription;
 use Stripe\Webhook;
 
 class SubscriptionController extends Controller
@@ -93,6 +94,54 @@ class SubscriptionController extends Controller
         }
 
         return view('subscription.success', compact('message', 'type'));
+    }
+
+    public function cancel(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'confirmation' => 'required|in:CANCEL',
+        ], [
+            'confirmation.in' => 'You must type CANCEL exactly to confirm.',
+        ]);
+
+        $user = $request->user();
+
+        if (! $user->isSubscribed() || ! $user->stripe_customer_id) {
+            return redirect()->route('billing.index')
+                ->with('warning', 'No active subscription to cancel.');
+        }
+
+        try {
+            Stripe::setApiKey(config('services.stripe.secret'));
+
+            $subscriptions = StripeSubscription::all([
+                'customer' => $user->stripe_customer_id,
+                'status'   => 'active',
+                'limit'    => 1,
+            ]);
+
+            $sub = $subscriptions->data[0] ?? null;
+
+            if (! $sub) {
+                $user->update(['subscription_status' => null]);
+                return redirect()->route('billing.index')
+                    ->with('warning', 'Subscription was already inactive.');
+            }
+
+            // Cancel at period end so the user keeps access until billing date
+            StripeSubscription::update($sub->id, [
+                'cancel_at_period_end' => true,
+            ]);
+
+            $user->update(['subscription_status' => 'canceling']);
+
+            return redirect()->route('billing.index')
+                ->with('success', 'Your subscription has been cancelled. You\'ll keep access until the end of your current billing period.');
+        } catch (\Throwable $e) {
+            \Log::error('Subscription cancel failed', ['error' => $e->getMessage()]);
+            return redirect()->route('billing.index')
+                ->with('warning', 'We couldn\'t cancel your subscription right now. Please try again or contact support.');
+        }
     }
 
     public function webhook(Request $request): Response

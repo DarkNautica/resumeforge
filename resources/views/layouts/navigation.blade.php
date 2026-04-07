@@ -66,7 +66,7 @@
                                 class="block px-4 py-2.5 text-sm text-[#888] hover:text-[#f0ece4] hover:bg-[#161616] transition">
                                 My Resumes
                             </a>
-                            <a href="{{ route('plans') }}"
+                            <a href="{{ route('billing.index') }}"
                                 class="block px-4 py-2.5 text-sm text-[#888] hover:text-[#f0ece4] hover:bg-[#161616] transition">
                                 Billing
                             </a>
@@ -117,7 +117,7 @@
                 <p class="text-xs text-[#555] mb-2">{{ Auth::user()->email }}</p>
                 <a href="{{ route('profile.edit') }}" class="block py-2.5 text-sm text-[#888]">My Account</a>
                 <a href="{{ route('dashboard') }}" class="block py-2.5 text-sm text-[#888]">My Resumes</a>
-                <a href="{{ route('plans') }}" class="block py-2.5 text-sm text-[#888]">Billing</a>
+                <a href="{{ route('billing.index') }}" class="block py-2.5 text-sm text-[#888]">Billing</a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="py-2.5 text-sm text-[#ff5555]">Log out</button>

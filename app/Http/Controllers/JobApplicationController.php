@@ -147,11 +147,17 @@ PROMPT;
         return view('applications.show', compact('application'));
     }
 
-    public function downloadPdf(JobApplication $application): Response
+    public function downloadPdf(Request $request, JobApplication $application): Response
     {
         $this->authorize('view', $application);
 
         abort_if(empty($application->tailored_resume), 404, 'No tailored resume available.');
+
+        // Pick template (executive | modern | classic), default executive
+        $allowed  = ['executive', 'modern', 'classic'];
+        $template = in_array($request->query('template'), $allowed, true)
+            ? $request->query('template')
+            : 'executive';
 
         // Run a quality-check pass through Claude before rendering. Falls back
         // to the stored data silently if anything goes wrong.
@@ -164,12 +170,12 @@ PROMPT;
         $application->tailored_resume = $cleaned['tailored_resume'];
         $application->cover_letter    = $cleaned['cover_letter'];
 
-        $pdf = Pdf::loadView('pdf.resume', compact('application'))
+        $pdf = Pdf::loadView("pdf.{$template}", compact('application'))
             ->setPaper('a4', 'portrait');
 
         $name     = $application->tailored_resume['full_name'] ?? 'resume';
         $company  = $application->company_name;
-        $filename = Str::slug("{$name} {$company} resume") . '.pdf';
+        $filename = Str::slug("{$name} {$company} {$template} resume") . '.pdf';
 
         return $pdf->download($filename);
     }

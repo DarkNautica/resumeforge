@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BillingController;
 use App\Http\Controllers\JobApplicationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResumeController;
@@ -24,8 +25,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Billing
     Route::get('/plans', [SubscriptionController::class, 'plans'])->name('plans');
+    Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
     Route::post('/billing/credit', [SubscriptionController::class, 'buyCredit'])->name('billing.credit');
     Route::post('/billing/subscribe', [SubscriptionController::class, 'subscribe'])->name('billing.subscribe');
+    Route::post('/billing/cancel', [SubscriptionController::class, 'cancel'])->name('billing.cancel');
     Route::get('/billing/success', [SubscriptionController::class, 'success'])->name('subscription.success');
 });
 

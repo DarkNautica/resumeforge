@@ -29,7 +29,12 @@ class User extends Authenticatable
 
     public function isSubscribed(): bool
     {
-        return $this->subscription_status === 'active';
+        return in_array($this->subscription_status, ['active', 'canceling'], true);
+    }
+
+    public function isCanceling(): bool
+    {
+        return $this->subscription_status === 'canceling';
     }
 
     public function hasAccess(): bool
