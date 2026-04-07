@@ -15,6 +15,10 @@ Route::get('/', function () {
 
 Route::get('/support', [SupportController::class, 'index'])->name('support');
 
+// Legal
+Route::view('/privacy', 'legal.privacy')->name('legal.privacy');
+Route::view('/terms', 'legal.terms')->name('legal.terms');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', function () {
         $resumes = auth()->user()->resumes()->orderByDesc('created_at')->get();

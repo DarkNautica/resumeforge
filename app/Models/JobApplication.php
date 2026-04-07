@@ -19,10 +19,13 @@ class JobApplication extends Model
         'tailored_resume',
         'cover_letter',
         'status',
+        'match_score',
+        'match_label',
     ];
 
     protected $casts = [
         'tailored_resume' => 'array',
+        'match_score'     => 'integer',
     ];
 
     public function user(): BelongsTo

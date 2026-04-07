@@ -179,79 +179,219 @@
                             </div>
                         </div>
 
-                        <div class="p-7 space-y-6">
-                            {{-- Contact --}}
+                        <div class="p-7 space-y-6" x-data="{ showOriginal: false }">
+
+                            {{-- ─── Match Score badge ───────────────── --}}
+                            @if ($application->match_score)
+                                @php
+                                    $score = $application->match_score;
+                                    if ($score >= 80) {
+                                        $scoreColor    = 'text-volt';
+                                        $scoreBorder   = 'border-[#1a4a00]';
+                                        $scoreBg       = 'bg-[#0d2600]';
+                                    } elseif ($score >= 60) {
+                                        $scoreColor    = 'text-[#ffcc00]';
+                                        $scoreBorder   = 'border-[#332800]';
+                                        $scoreBg       = 'bg-[#1a1400]';
+                                    } else {
+                                        $scoreColor    = 'text-[#ff5555]';
+                                        $scoreBorder   = 'border-[#330000]';
+                                        $scoreBg       = 'bg-[#1a0000]';
+                                    }
+                                @endphp
+                                <div class="flex items-center gap-5 {{ $scoreBg }} border {{ $scoreBorder }} rounded-2xl p-5"
+                                    title="Score reflects how well your tailored resume aligns with this job description.">
+                                    {{-- Circular score --}}
+                                    <div class="w-20 h-20 rounded-full {{ $scoreBg }} border-2 {{ $scoreBorder }} flex items-center justify-center shrink-0"
+                                         style="border-color: currentColor;">
+                                        <div class="text-center">
+                                            <p class="font-heading text-3xl {{ $scoreColor }} leading-none">{{ $score }}</p>
+                                            <p class="text-[8px] text-[#666] uppercase tracking-widest mt-0.5">Match</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs font-semibold {{ $scoreColor }} uppercase tracking-widest mb-1">
+                                            {{ $application->match_label ?? ($score >= 80 ? 'Strong Match' : ($score >= 60 ? 'Good Match' : 'Needs Work')) }}
+                                        </p>
+                                        <p class="text-xs text-[#666] leading-relaxed">
+                                            Score reflects how well your tailored resume aligns with this job description.
+                                        </p>
+                                    </div>
+                                </div>
+                            @endif
+
+                            {{-- ─── Before / After toggle ─────────────── --}}
                             <div>
-                                <h3 class="text-xl font-semibold text-[#f0ece4]">{{ $tr['full_name'] ?? '' }}</h3>
-                                <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#555]">
-                                    @if (!empty($tr['email'])) <span>{{ $tr['email'] }}</span> @endif
-                                    @if (!empty($tr['phone'])) <span>{{ $tr['phone'] }}</span> @endif
-                                    @if (!empty($tr['location'])) <span>{{ $tr['location'] }}</span> @endif
+                                <p class="text-[10px] font-semibold text-[#555] uppercase tracking-widest mb-2">See the difference AI made</p>
+                                <div class="inline-flex bg-[#0d0d0d] border border-[#222] rounded-lg p-1">
+                                    <button type="button" @click="showOriginal = false"
+                                        :class="!showOriginal ? 'bg-volt text-black' : 'text-[#666] hover:text-[#f0ece4]'"
+                                        class="px-4 py-1.5 text-xs font-semibold rounded-md transition">
+                                        Tailored Resume
+                                    </button>
+                                    <button type="button" @click="showOriginal = true"
+                                        :class="showOriginal ? 'bg-[#1a1a1a] text-[#f0ece4]' : 'text-[#666] hover:text-[#f0ece4]'"
+                                        class="px-4 py-1.5 text-xs font-semibold rounded-md transition">
+                                        Original Resume
+                                    </button>
                                 </div>
                             </div>
 
-                            @if (!empty($tr['summary']))
-                                <div class="border-t border-[#1a1a1a] pt-5">
-                                    <p class="text-xs font-semibold text-volt uppercase tracking-widest mb-2">Summary</p>
-                                    <p class="text-sm text-[#888] leading-relaxed">{{ $tr['summary'] }}</p>
+                            {{-- ═══ TAILORED VIEW ════════════════════════ --}}
+                            <div x-show="!showOriginal" class="space-y-6">
+                                {{-- Contact --}}
+                                <div>
+                                    <h3 class="text-xl font-semibold text-[#f0ece4]">{{ $tr['full_name'] ?? '' }}</h3>
+                                    <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#555]">
+                                        @if (!empty($tr['email'])) <span>{{ $tr['email'] }}</span> @endif
+                                        @if (!empty($tr['phone'])) <span>{{ $tr['phone'] }}</span> @endif
+                                        @if (!empty($tr['location'])) <span>{{ $tr['location'] }}</span> @endif
+                                    </div>
                                 </div>
-                            @endif
 
-                            @if (!empty($tr['work_experience']))
-                                <div class="border-t border-[#1a1a1a] pt-5">
-                                    <p class="text-xs font-semibold text-volt uppercase tracking-widest mb-4">Experience</p>
-                                    <div class="space-y-5">
-                                        @foreach ($tr['work_experience'] as $job)
-                                            <div class="{{ !$loop->last ? 'pb-5 border-b border-[#161616]' : '' }}">
+                                @if (!empty($tr['summary']))
+                                    <div class="border-t border-[#1a1a1a] pt-5">
+                                        <p class="text-xs font-semibold text-volt uppercase tracking-widest mb-2">Summary</p>
+                                        <p class="text-sm text-[#888] leading-relaxed">{{ $tr['summary'] }}</p>
+                                    </div>
+                                @endif
+
+                                @if (!empty($tr['work_experience']))
+                                    <div class="border-t border-[#1a1a1a] pt-5">
+                                        <p class="text-xs font-semibold text-volt uppercase tracking-widest mb-4">Experience</p>
+                                        <div class="space-y-5">
+                                            @foreach ($tr['work_experience'] as $job)
+                                                <div class="{{ !$loop->last ? 'pb-5 border-b border-[#161616]' : '' }}">
+                                                    <div class="flex items-start justify-between gap-3">
+                                                        <div>
+                                                            <p class="font-medium text-[#f0ece4] text-sm">{{ $job['title'] ?? '' }}</p>
+                                                            <p class="text-xs text-[#555] mt-0.5">{{ $job['company'] ?? '' }}</p>
+                                                        </div>
+                                                        <p class="text-xs text-[#444] whitespace-nowrap shrink-0 mt-0.5">
+                                                            {{ $job['start_date'] ?? '' }}{{ isset($job['end_date']) ? ' – '.$job['end_date'] : '' }}
+                                                        </p>
+                                                    </div>
+                                                    @if (!empty($job['description']))
+                                                        <p class="mt-2 text-xs text-[#666] leading-relaxed">{{ $job['description'] }}</p>
+                                                    @endif
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if (!empty($tr['education']))
+                                    <div class="border-t border-[#1a1a1a] pt-5">
+                                        <p class="text-xs font-semibold text-volt uppercase tracking-widest mb-4">Education</p>
+                                        <div class="space-y-3">
+                                            @foreach ($tr['education'] as $edu)
                                                 <div class="flex items-start justify-between gap-3">
                                                     <div>
-                                                        <p class="font-medium text-[#f0ece4] text-sm">{{ $job['title'] ?? '' }}</p>
-                                                        <p class="text-xs text-[#555] mt-0.5">{{ $job['company'] ?? '' }}</p>
+                                                        <p class="font-medium text-[#f0ece4] text-sm">{{ $edu['degree'] ?? '' }}</p>
+                                                        <p class="text-xs text-[#555] mt-0.5">{{ $edu['institution'] ?? '' }}</p>
                                                     </div>
-                                                    <p class="text-xs text-[#444] whitespace-nowrap shrink-0 mt-0.5">
-                                                        {{ $job['start_date'] ?? '' }}{{ isset($job['end_date']) ? ' – '.$job['end_date'] : '' }}
-                                                    </p>
+                                                    @if (!empty($edu['year']))
+                                                        <p class="text-xs text-[#444] shrink-0">{{ $edu['year'] }}</p>
+                                                    @endif
                                                 </div>
-                                                @if (!empty($job['description']))
-                                                    <p class="mt-2 text-xs text-[#666] leading-relaxed">{{ $job['description'] }}</p>
-                                                @endif
-                                            </div>
-                                        @endforeach
+                                            @endforeach
+                                        </div>
                                     </div>
+                                @endif
+
+                                @if (!empty($tr['skills']))
+                                    <div class="border-t border-[#1a1a1a] pt-5">
+                                        <p class="text-xs font-semibold text-volt uppercase tracking-widest mb-3">Skills</p>
+                                        <div class="flex flex-wrap gap-1.5">
+                                            @foreach ($tr['skills'] as $skill)
+                                                @if ($skill)
+                                                    <span class="px-2.5 py-1 bg-[#0d0d0d] border border-[#2a2a2a] text-[#777] text-xs rounded-md">{{ $skill }}</span>
+                                                @endif
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+
+                            {{-- ═══ ORIGINAL VIEW ════════════════════════ --}}
+                            @php $orig = $application->resume; @endphp
+                            @if ($orig)
+                                <div x-show="showOriginal" x-cloak class="space-y-6">
+                                    {{-- Contact --}}
+                                    <div>
+                                        <h3 class="text-xl font-semibold text-[#f0ece4]">{{ $orig->full_name }}</h3>
+                                        <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#555]">
+                                            @if ($orig->email) <span>{{ $orig->email }}</span> @endif
+                                            @if ($orig->phone) <span>{{ $orig->phone }}</span> @endif
+                                            @if ($orig->location) <span>{{ $orig->location }}</span> @endif
+                                        </div>
+                                    </div>
+
+                                    @if ($orig->summary)
+                                        <div class="border-t border-[#1a1a1a] pt-5">
+                                            <p class="text-xs font-semibold text-[#666] uppercase tracking-widest mb-2">Summary <span class="text-[#444] font-normal">(original)</span></p>
+                                            <p class="text-sm text-[#888] leading-relaxed">{{ $orig->summary }}</p>
+                                        </div>
+                                    @endif
+
+                                    @if (!empty($orig->work_experience))
+                                        <div class="border-t border-[#1a1a1a] pt-5">
+                                            <p class="text-xs font-semibold text-[#666] uppercase tracking-widest mb-4">Experience <span class="text-[#444] font-normal">(original)</span></p>
+                                            <div class="space-y-5">
+                                                @foreach ($orig->work_experience as $job)
+                                                    <div class="{{ !$loop->last ? 'pb-5 border-b border-[#161616]' : '' }}">
+                                                        <div class="flex items-start justify-between gap-3">
+                                                            <div>
+                                                                <p class="font-medium text-[#f0ece4] text-sm">{{ $job['title'] ?? '' }}</p>
+                                                                <p class="text-xs text-[#555] mt-0.5">{{ $job['company'] ?? '' }}</p>
+                                                            </div>
+                                                            <p class="text-xs text-[#444] whitespace-nowrap shrink-0 mt-0.5">
+                                                                {{ $job['start_date'] ?? '' }}{{ isset($job['end_date']) ? ' – '.$job['end_date'] : '' }}
+                                                            </p>
+                                                        </div>
+                                                        @if (!empty($job['description']))
+                                                            <p class="mt-2 text-xs text-[#666] leading-relaxed">{{ $job['description'] }}</p>
+                                                        @endif
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    @if (!empty($orig->education))
+                                        <div class="border-t border-[#1a1a1a] pt-5">
+                                            <p class="text-xs font-semibold text-[#666] uppercase tracking-widest mb-4">Education <span class="text-[#444] font-normal">(original)</span></p>
+                                            <div class="space-y-3">
+                                                @foreach ($orig->education as $edu)
+                                                    <div class="flex items-start justify-between gap-3">
+                                                        <div>
+                                                            <p class="font-medium text-[#f0ece4] text-sm">{{ $edu['degree'] ?? '' }}</p>
+                                                            <p class="text-xs text-[#555] mt-0.5">{{ $edu['institution'] ?? '' }}</p>
+                                                        </div>
+                                                        @if (!empty($edu['year']))
+                                                            <p class="text-xs text-[#444] shrink-0">{{ $edu['year'] }}</p>
+                                                        @endif
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    @if (!empty($orig->skills))
+                                        <div class="border-t border-[#1a1a1a] pt-5">
+                                            <p class="text-xs font-semibold text-[#666] uppercase tracking-widest mb-3">Skills <span class="text-[#444] font-normal">(original)</span></p>
+                                            <div class="flex flex-wrap gap-1.5">
+                                                @foreach ($orig->skills as $skill)
+                                                    @if ($skill)
+                                                        <span class="px-2.5 py-1 bg-[#0d0d0d] border border-[#2a2a2a] text-[#777] text-xs rounded-md">{{ $skill }}</span>
+                                                    @endif
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
                                 </div>
                             @endif
 
-                            @if (!empty($tr['education']))
-                                <div class="border-t border-[#1a1a1a] pt-5">
-                                    <p class="text-xs font-semibold text-volt uppercase tracking-widest mb-4">Education</p>
-                                    <div class="space-y-3">
-                                        @foreach ($tr['education'] as $edu)
-                                            <div class="flex items-start justify-between gap-3">
-                                                <div>
-                                                    <p class="font-medium text-[#f0ece4] text-sm">{{ $edu['degree'] ?? '' }}</p>
-                                                    <p class="text-xs text-[#555] mt-0.5">{{ $edu['institution'] ?? '' }}</p>
-                                                </div>
-                                                @if (!empty($edu['year']))
-                                                    <p class="text-xs text-[#444] shrink-0">{{ $edu['year'] }}</p>
-                                                @endif
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endif
-
-                            @if (!empty($tr['skills']))
-                                <div class="border-t border-[#1a1a1a] pt-5">
-                                    <p class="text-xs font-semibold text-volt uppercase tracking-widest mb-3">Skills</p>
-                                    <div class="flex flex-wrap gap-1.5">
-                                        @foreach ($tr['skills'] as $skill)
-                                            @if ($skill)
-                                                <span class="px-2.5 py-1 bg-[#0d0d0d] border border-[#2a2a2a] text-[#777] text-xs rounded-md">{{ $skill }}</span>
-                                            @endif
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endif
                         </div>
                     </div>
                 @endif

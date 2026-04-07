@@ -1,6 +1,33 @@
 <x-app-layout>
     <div class="max-w-7xl mx-auto px-6 py-12 space-y-12">
 
+        {{-- ─── Onboarding prompt ───────────────────────────────── --}}
+        @if ($resumes->isEmpty())
+            <div class="bg-[#0d1a00] border border-[#C8FF00]/20 rounded-2xl p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                <div class="min-w-0">
+                    <div class="text-[#C8FF00] text-xs font-bold uppercase tracking-widest mb-2">Get Started</div>
+                    <h2 class="font-['Bebas_Neue'] text-3xl text-white mb-2 leading-none">CREATE YOUR BASE RESUME</h2>
+                    <p class="text-[#888] text-sm">Build your resume once, tailor it to every job in seconds.</p>
+                </div>
+                <a href="{{ route('resumes.create') }}"
+                    class="bg-[#C8FF00] text-black font-bold px-8 py-4 rounded-xl hover:bg-[#d4ff00] transition whitespace-nowrap shrink-0">
+                    Create Resume →
+                </a>
+            </div>
+        @elseif ($applications->isEmpty())
+            <div class="bg-[#0a0a1a] border border-[#4f46e5]/30 rounded-2xl p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                <div class="min-w-0">
+                    <div class="text-[#818cf8] text-xs font-bold uppercase tracking-widest mb-2">Next Step</div>
+                    <h2 class="font-['Bebas_Neue'] text-3xl text-white mb-2 leading-none">TAILOR YOUR FIRST RESUME</h2>
+                    <p class="text-[#888] text-sm">Paste a job description and watch AI transform your resume in seconds.</p>
+                </div>
+                <a href="{{ route('applications.create') }}"
+                    class="bg-[#4f46e5] text-white font-bold px-8 py-4 rounded-xl hover:bg-[#4338ca] transition whitespace-nowrap shrink-0">
+                    Tailor Resume →
+                </a>
+            </div>
+        @endif
+
         {{-- Page header --}}
         <div class="flex items-end justify-between">
             <div>

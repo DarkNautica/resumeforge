@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 
 class JobApplicationController extends Controller
@@ -24,6 +25,14 @@ class JobApplicationController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        // Rate limit: max 20 tailors per hour per user
+        if (RateLimiter::tooManyAttempts('tailor:' . auth()->id(), 20)) {
+            return back()->withErrors([
+                'error' => 'You have run too many tailors this hour. Please wait before trying again.',
+            ])->withInput();
+        }
+        RateLimiter::hit('tailor:' . auth()->id(), 3600);
+
         // Paywall: require active subscription or at least one credit
         if (! $request->user()->hasAccess()) {
             return redirect()->route('plans')
@@ -126,6 +135,40 @@ PROMPT;
                 'status'          => 'complete',
             ]);
 
+            // ─── Match score (Haiku — fast & cheap, ~$0.001/call) ──
+            try {
+                $scoreResponse = Http::withHeaders([
+                    'x-api-key'         => config('services.anthropic.key'),
+                    'anthropic-version' => '2023-06-01',
+                    'content-type'      => 'application/json',
+                ])->post('https://api.anthropic.com/v1/messages', [
+                    'model'      => 'claude-haiku-4-5-20251001',
+                    'max_tokens' => 100,
+                    'messages'   => [[
+                        'role'    => 'user',
+                        'content' => 'Rate how well this resume matches this job description from 1-100. Return only a JSON object like {"score": 87, "label": "Strong Match"}. Resume: '
+                            . json_encode($parsed['tailored_resume'])
+                            . ' Job: '
+                            . substr($validated['job_description'], 0, 500),
+                    ]],
+                ]);
+
+                $rawScore = $scoreResponse->json('content.0.text');
+                $rawScore = preg_replace('/^```(?:json)?\s*/i', '', trim((string) $rawScore));
+                $rawScore = preg_replace('/\s*```$/', '', $rawScore);
+                $scoreData = json_decode(trim($rawScore), true);
+
+                if (is_array($scoreData) && isset($scoreData['score'])) {
+                    $application->update([
+                        'match_score' => max(1, min(100, (int) $scoreData['score'])),
+                        'match_label' => $scoreData['label'] ?? null,
+                    ]);
+                }
+            } catch (\Throwable $e) {
+                \Log::warning('Match score generation failed', ['error' => $e->getMessage()]);
+                // Non-fatal — application still completes without a score
+            }
+
             // Deduct one credit for pay-per-use users
             if (! $request->user()->isSubscribed()) {
                 $request->user()->decrement('tailor_credits');
@@ -147,7 +190,7 @@ PROMPT;
         return view('applications.show', compact('application'));
     }
 
-    public function downloadPdf(Request $request, JobApplication $application): Response
+    public function downloadPdf(Request $request, JobApplication $application): \Symfony\Component\HttpFoundation\StreamedResponse|Response
     {
         $this->authorize('view', $application);
 

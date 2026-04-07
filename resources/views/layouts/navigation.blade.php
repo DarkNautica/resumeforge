@@ -8,7 +8,7 @@
             </a>
 
             {{-- Desktop nav links — perfectly centered --}}
-            <div class="hidden lg:flex items-center gap-8 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+            <div class="hidden lg:flex items-center gap-6 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
                 <a href="{{ url('/') }}"
                    class="text-sm font-medium transition {{ request()->is('/') ? 'text-[#f0ece4]' : 'text-[#666] hover:text-[#f0ece4]' }}">
                     Home
@@ -25,18 +25,17 @@
                    class="text-sm font-medium transition {{ request()->routeIs('support') ? 'text-[#f0ece4]' : 'text-[#666] hover:text-[#f0ece4]' }}">
                     Support
                 </a>
+                @auth
+                    <a href="{{ route('dashboard') }}"
+                       class="text-sm font-medium transition {{ request()->routeIs('dashboard') ? 'text-[#f0ece4]' : 'text-[#666] hover:text-[#f0ece4]' }}">
+                        Dashboard
+                    </a>
+                @endauth
             </div>
 
             {{-- Right side --}}
             <div class="hidden md:flex items-center gap-3 shrink-0">
                 @auth
-                    {{-- Always-visible Dashboard button --}}
-                    <a href="{{ route('dashboard') }}"
-                        class="px-4 py-2 border text-sm font-semibold rounded-lg transition
-                        {{ request()->routeIs('dashboard') ? 'border-volt text-volt bg-[#0d2600]' : 'border-[#2a2a2a] text-[#f0ece4] hover:border-volt hover:text-volt' }}">
-                        Dashboard
-                    </a>
-
                     @if (auth()->user()->resumes()->exists())
                         <a href="{{ route('applications.create') }}"
                             class="px-4 py-2 bg-volt text-black text-sm font-semibold rounded-lg hover:bg-[#b3e600] transition">

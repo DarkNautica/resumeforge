@@ -1,48 +1,59 @@
 <!DOCTYPE html>
-<html style="background: #1e293b">
+<html style="background: #1a1a1a">
 <head>
 <meta charset="utf-8">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { height: 100%; margin: 0; padding: 0; }
-body { font-family: Arial, Helvetica, sans-serif; font-size: 10px; color: #0f172a; background: #1e293b; }
+body { font-family: Arial, Helvetica, sans-serif; font-size: 10px; color: #111827; background: #1a1a1a; }
 
 .outer { width: 100%; border-collapse: collapse; table-layout: fixed; border: 0; }
 
-.sidebar { background-color: #1e293b; padding: 36px 22px 28px; vertical-align: top; }
-.side-name { font-size: 15px; font-weight: bold; color: #ffffff; word-wrap: break-word; line-height: 1.3; margin-bottom: 10px; }
-.side-contact { font-size: 8.5px; color: #94a3b8; line-height: 2.1; margin-bottom: 24px; word-wrap: break-word; }
-.side-label { font-size: 7.5px; letter-spacing: 2px; text-transform: uppercase; color: #64748b; margin-top: 28px; margin-bottom: 16px; border-bottom: 1px solid #334155; padding-bottom: 4px; font-weight: bold; }
-.side-skill { font-size: 9px; color: #cbd5e1; line-height: 2.2; margin-bottom: 16px; }
-.side-edu { margin-bottom: 16px; word-wrap: break-word; }
-.side-edu-degree { font-size: 9px; font-weight: bold; color: #e2e8f0; line-height: 1.4; }
-.side-edu-meta { font-size: 8px; color: #94a3b8; line-height: 1.5; margin-top: 2px; }
+/* ── Top accent bar (subtle indigo) ── */
+.accent-row td { background-color: #4f46e5; height: 4px; line-height: 4px; font-size: 0; padding: 0; }
 
-.main { background-color: #ffffff; padding: 36px 28px; vertical-align: top; }
-.main-name { font-size: 24px; font-weight: bold; color: #0f172a; line-height: 1.15; letter-spacing: -0.3px; margin-bottom: 4px; }
-.main-role { font-size: 11px; color: #64748b; margin-bottom: 22px; }
-.main-section { font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: #1e293b; border-bottom: 2px solid #1e293b; padding-bottom: 3px; margin-top: 28px; margin-bottom: 16px; font-weight: bold; }
-.main-summary { font-size: 10px; line-height: 1.7; color: #374151; }
-.exp-entry { margin-bottom: 20px; }
-.exp-title { font-size: 11.5px; font-weight: bold; color: #0f172a; line-height: 1.3; }
-.exp-dates { font-size: 9.5px; color: #6b7280; white-space: nowrap; }
-.exp-company { font-size: 10px; color: #6b7280; font-style: italic; margin-top: 2px; margin-bottom: 5px; }
-.exp-desc { font-size: 10px; color: #4b5563; line-height: 1.65; }
+/* ── Left sidebar ── */
+.sidebar { background-color: #1a1a1a; padding: 32px 22px; vertical-align: top; }
+.side-name { font-size: 16px; font-weight: bold; color: #ffffff; word-wrap: break-word; line-height: 1.3; letter-spacing: 0.5px; margin-bottom: 16px; }
+.side-contact { font-size: 8.5px; color: #9ca3af; line-height: 2.2; margin-bottom: 24px; word-wrap: break-word; }
+.side-label { font-size: 7px; letter-spacing: 2.5px; text-transform: uppercase; color: #6b7280; border-bottom: 1px solid #2d2d2d; padding-bottom: 5px; margin-top: 22px; margin-bottom: 10px; font-weight: bold; }
+.side-skill { font-size: 9px; color: #d1d5db; line-height: 2.1; }
+.side-edu { margin-bottom: 12px; word-wrap: break-word; }
+.side-edu-degree { font-size: 9px; font-weight: bold; color: #e5e7eb; line-height: 1.4; }
+.side-edu-meta { font-size: 8px; color: #9ca3af; line-height: 1.5; margin-top: 2px; }
 
+/* ── Right column ── */
+.main { background-color: #ffffff; padding: 32px 28px; vertical-align: top; }
+.main-name { font-size: 24px; font-weight: bold; color: #111827; line-height: 1.15; letter-spacing: -0.5px; margin-bottom: 2px; }
+.main-section { font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: #374151; border-bottom: 1.5px solid #e5e7eb; padding-bottom: 4px; margin-top: 24px; margin-bottom: 12px; font-weight: bold; }
+.main-summary { font-size: 10px; line-height: 1.7; color: #4b5563; }
+.exp-entry { margin-bottom: 18px; }
+.exp-title { font-size: 11.5px; font-weight: bold; color: #111827; line-height: 1.3; }
+.exp-company { font-size: 9.5px; color: #6b7280; font-style: italic; }
+.exp-dates { font-size: 9px; color: #9ca3af; white-space: nowrap; }
+.exp-desc { font-size: 10px; color: #4b5563; line-height: 1.65; margin-top: 5px; }
+
+/* ── Cover letter ── */
 .cover-page { padding: 56px; background-color: #ffffff; page-break-before: always; }
-.cover-name { font-size: 22px; font-weight: bold; color: #0f172a; line-height: 1.2; letter-spacing: -0.3px; }
-.cover-contact { font-size: 9.5px; color: #64748b; margin-top: 4px; }
-.cover-rule { border: none; border-top: 2px solid #1e293b; width: 36px; margin: 16px 0 28px; padding: 0; height: 0; font-size: 0; }
-.cover-date { font-size: 10px; color: #94a3b8; margin-bottom: 22px; }
+.cover-name { font-size: 22px; font-weight: bold; color: #111827; line-height: 1.2; letter-spacing: -0.3px; }
+.cover-contact { font-size: 9.5px; color: #6b7280; margin-top: 4px; }
+.cover-rule { border: none; border-top: 2px solid #4f46e5; width: 36px; margin: 16px 0 28px; padding: 0; height: 0; font-size: 0; }
+.cover-date { font-size: 10px; color: #9ca3af; margin-bottom: 22px; }
 .cover-body { font-size: 10.5px; line-height: 1.75; color: #374151; margin-bottom: 14px; }
 </style>
 </head>
-<body style="background: #1e293b;">
+<body style="background: #1a1a1a;">
 
 <table class="outer" cellpadding="0" cellspacing="0" border="0">
+
+{{-- Indigo accent bar across the top --}}
+<tr class="accent-row">
+<td colspan="2" style="background-color: #4f46e5; height: 4px; line-height: 4px; font-size: 0; padding: 0;">&nbsp;</td>
+</tr>
+
 <tr>
 
-<td class="sidebar" valign="top" width="200" style="width: 200px;">
+<td class="sidebar" valign="top" width="210" style="width: 210px;">
 <div class="side-name">{{ $resume['full_name'] ?? $application->resume->full_name ?? '' }}</div>
 <div class="side-contact">
 @if(!empty($resume['email']) || !empty($application->resume->email)){{ $resume['email'] ?? $application->resume->email }}<br>@endif
@@ -72,9 +83,6 @@ body { font-family: Arial, Helvetica, sans-serif; font-size: 10px; color: #0f172
 
 <td class="main" valign="top">
 <div class="main-name">{{ $resume['full_name'] ?? $application->resume->full_name ?? '' }}</div>
-@if(!empty($application->job_title))
-<div class="main-role">Targeting: {{ $application->job_title }} · {{ $application->company_name }}</div>
-@endif
 
 @if($resume['summary'] ?? null)
 <div class="main-section">Summary</div>
@@ -89,7 +97,9 @@ body { font-family: Arial, Helvetica, sans-serif; font-size: 10px; color: #0f172
 <td valign="top"><span class="exp-title">{{ $job['title'] ?? '' }}</span></td>
 <td valign="top" align="right"><span class="exp-dates">{{ $job['start_date'] ?? '' }}{{ isset($job['end_date']) ? ' – ' . $job['end_date'] : ' – Present' }}</span></td>
 </tr></table>
-<div class="exp-company">{{ $job['company'] ?? '' }}</div>
+<table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 2px;"><tr>
+<td><span class="exp-company">{{ $job['company'] ?? '' }}</span></td>
+</tr></table>
 @if(!empty($job['description']))
 <div class="exp-desc">{{ $job['description'] }}</div>
 @endif
