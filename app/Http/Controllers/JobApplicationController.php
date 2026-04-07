@@ -180,11 +180,23 @@ PROMPT;
         $pdf = Pdf::loadView("pdf.{$template}", compact('application', 'resume', 'coverLetter'))
             ->setPaper('a4', 'portrait');
 
-        $name     = $resume['full_name'] ?? 'resume';
-        $company  = $application->company_name;
-        $filename = Str::slug("{$name} {$company} {$template} resume") . '.pdf';
+        $name    = $resume['full_name'] ?? 'resume';
+        $company = $application->company_name;
 
-        return $pdf->download($filename);
+        // Build a strictly safe filename: slug + only [A-Za-z0-9._-]
+        $filename = Str::slug("{$name} {$company} {$template} resume") . '.pdf';
+        $filename = preg_replace('/[^A-Za-z0-9._-]/', '', $filename);
+        $filename = $filename ?: 'tailored-resume.pdf';
+
+        // Stream with explicit safe headers so browsers don't flag it
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf->output();
+        }, $filename, [
+            'Content-Type'           => 'application/pdf',
+            'Content-Disposition'    => 'attachment; filename="' . $filename . '"',
+            'X-Content-Type-Options' => 'nosniff',
+            'Cache-Control'          => 'private, no-cache',
+        ]);
     }
 
     /**

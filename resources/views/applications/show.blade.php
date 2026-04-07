@@ -81,42 +81,76 @@
 
                             {{-- Template picker --}}
                             <div>
-                                <p class="text-[10px] font-medium text-[#555] uppercase tracking-widest mb-2">Download as PDF</p>
-                                <div class="grid grid-cols-3 gap-2">
+                                <p class="text-[10px] font-medium text-[#555] uppercase tracking-widest mb-3">Download as PDF</p>
+                                <div class="grid grid-cols-3 gap-3">
 
-                                    {{-- Executive --}}
+                                    {{-- ─── EXECUTIVE ─────────────────────────── --}}
                                     <a href="{{ route('applications.pdf', $application) }}?template=executive"
-                                        @click="pdfLoading = true; setTimeout(() => pdfLoading = false, 4000)"
-                                        class="group flex flex-col items-start gap-1 px-3 py-2.5 bg-[#0d0d0d] border border-[#222] rounded-lg hover:border-volt transition">
-                                        <div class="flex items-center gap-1.5 w-full">
-                                            <span class="w-2 h-3.5 bg-[#1e293b] rounded-sm"></span>
-                                            <span class="flex-1 h-3.5 bg-[#222] rounded-sm"></span>
+                                        @click="pdfLoading = true; setTimeout(() => pdfLoading = false, 15000)"
+                                        class="group block cursor-pointer rounded-xl overflow-hidden border border-[#2a2a2a] hover:border-[#C8FF00] transition-all"
+                                        style="box-shadow: 0 0 0 0 rgba(200,255,0,0);"
+                                        onmouseover="this.style.boxShadow='0 0 24px rgba(200,255,0,0.2)'"
+                                        onmouseout="this.style.boxShadow='0 0 0 0 rgba(200,255,0,0)'">
+                                        {{-- Mockup --}}
+                                        <div class="bg-[#1e293b] p-3 h-24 flex gap-2">
+                                            <div class="w-8 bg-[#0f172a] rounded-sm flex flex-col gap-1 p-1">
+                                                <div class="h-1 bg-[#475569] rounded-full"></div>
+                                                <div class="h-0.5 bg-[#334155] rounded-full"></div>
+                                                <div class="h-0.5 bg-[#334155] rounded-full"></div>
+                                            </div>
+                                            <div class="flex-1 bg-white rounded-sm flex flex-col gap-1 p-1.5">
+                                                <div class="h-1.5 w-3/4 bg-[#1e293b] rounded-full"></div>
+                                                <div class="h-0.5 bg-[#cbd5e1] rounded-full"></div>
+                                                <div class="h-0.5 w-5/6 bg-[#cbd5e1] rounded-full"></div>
+                                                <div class="h-0.5 w-2/3 bg-[#cbd5e1] rounded-full"></div>
+                                            </div>
                                         </div>
-                                        <span class="text-xs font-semibold text-[#f0ece4] group-hover:text-volt transition">Executive</span>
-                                        <span class="text-[10px] text-[#444]">Navy sidebar</span>
+                                        {{-- Label --}}
+                                        <div class="bg-[#0d0d0d] px-3 py-2.5 border-t border-[#1f1f1f]">
+                                            <p class="text-[10px] font-bold tracking-widest text-[#f0ece4] group-hover:text-volt transition">EXECUTIVE</p>
+                                            <p class="text-[9px] text-[#555] mt-0.5">Navy sidebar · Corporate</p>
+                                        </div>
                                     </a>
 
-                                    {{-- Modern --}}
+                                    {{-- ─── MODERN ────────────────────────────── --}}
                                     <a href="{{ route('applications.pdf', $application) }}?template=modern"
-                                        @click="pdfLoading = true; setTimeout(() => pdfLoading = false, 4000)"
-                                        class="group flex flex-col items-start gap-1 px-3 py-2.5 bg-[#0d0d0d] border border-[#222] rounded-lg hover:border-volt transition">
-                                        <div class="flex items-center gap-1.5 w-full">
-                                            <span class="flex-1 h-3.5 bg-[#222] rounded-sm"></span>
+                                        @click="pdfLoading = true; setTimeout(() => pdfLoading = false, 15000)"
+                                        class="group block cursor-pointer rounded-xl overflow-hidden border border-[#2a2a2a] hover:border-[#C8FF00] transition-all transform hover:scale-[1.03]">
+                                        {{-- Mockup --}}
+                                        <div class="bg-white p-3 h-24 flex flex-col gap-1.5">
+                                            <p class="text-[#0f172a] font-bold leading-none" style="font-size: 18px; letter-spacing: -0.5px;">M</p>
+                                            <div class="h-0.5 w-6 bg-[#64748b] rounded-full mb-1"></div>
+                                            <div class="h-0.5 bg-[#cbd5e1] rounded-full"></div>
+                                            <div class="h-0.5 w-5/6 bg-[#cbd5e1] rounded-full"></div>
+                                            <div class="h-0.5 w-3/4 bg-[#cbd5e1] rounded-full"></div>
                                         </div>
-                                        <span class="text-xs font-semibold text-[#f0ece4] group-hover:text-volt transition">Modern</span>
-                                        <span class="text-[10px] text-[#444]">Single column</span>
+                                        {{-- Label --}}
+                                        <div class="bg-[#0d0d0d] px-3 py-2.5 border-t border-[#1f1f1f]">
+                                            <p class="text-[10px] font-bold tracking-widest text-[#f0ece4] group-hover:text-volt transition">MODERN</p>
+                                            <p class="text-[9px] text-[#555] mt-0.5">Clean · Contemporary</p>
+                                        </div>
                                     </a>
 
-                                    {{-- Classic --}}
+                                    {{-- ─── CLASSIC ───────────────────────────── --}}
                                     <a href="{{ route('applications.pdf', $application) }}?template=classic"
-                                        @click="pdfLoading = true; setTimeout(() => pdfLoading = false, 4000)"
-                                        class="group flex flex-col items-start gap-1 px-3 py-2.5 bg-[#0d0d0d] border border-[#222] rounded-lg hover:border-volt transition">
-                                        <div class="flex items-center gap-1.5 w-full">
-                                            <span class="flex-1 h-3.5 bg-[#1a1a1a] border-y border-[#444] rounded-sm"></span>
+                                        @click="pdfLoading = true; setTimeout(() => pdfLoading = false, 15000)"
+                                        class="group block cursor-pointer rounded-xl overflow-hidden border border-[#2a2a2a] hover:border-[#888] transition-all">
+                                        {{-- Mockup --}}
+                                        <div class="bg-[#f8f8f8] p-3 h-24 flex flex-col items-center gap-1">
+                                            <div class="h-1 w-2/3 bg-black rounded-full mt-0.5"></div>
+                                            <div class="h-0.5 w-1/2 bg-[#888] rounded-full"></div>
+                                            <div class="h-px w-full bg-black mt-1 mb-1"></div>
+                                            <div class="h-0.5 w-full bg-[#aaa] rounded-full"></div>
+                                            <div class="h-0.5 w-5/6 bg-[#aaa] rounded-full"></div>
+                                            <div class="h-0.5 w-3/4 bg-[#aaa] rounded-full"></div>
                                         </div>
-                                        <span class="text-xs font-semibold text-[#f0ece4] group-hover:text-volt transition">Classic</span>
-                                        <span class="text-[10px] text-[#444]">ATS-friendly</span>
+                                        {{-- Label --}}
+                                        <div class="bg-[#0d0d0d] px-3 py-2.5 border-t border-[#1f1f1f]">
+                                            <p class="text-[10px] font-bold tracking-widest text-[#f0ece4] group-hover:text-volt transition" style="font-family: 'Georgia', serif;">CLASSIC</p>
+                                            <p class="text-[9px] text-[#555] mt-0.5">ATS-Friendly · Traditional</p>
+                                        </div>
                                     </a>
+
                                 </div>
                             </div>
 
@@ -140,7 +174,7 @@
                                     <p class="text-sm text-[#888] leading-relaxed">
                                         Claude is polishing your resume<span class="inline-block animate-pulse">…</span>
                                     </p>
-                                    <p class="text-xs text-[#444] mt-4">This usually takes a few seconds</p>
+                                    <p class="text-xs text-[#444] mt-4">This may take up to 15 seconds</p>
                                 </div>
                             </div>
                         </div>

@@ -1,14 +1,14 @@
-<nav x-data="{ open: false }" class="bg-[#0a0a0a] border-b border-[#1a1a1a] sticky top-0 z-50">
+<nav x-data="{ open: false }" class="bg-[#0a0a0a] border-b border-[#1a1a1a] sticky top-0 z-50 relative">
     <div class="max-w-7xl mx-auto px-6">
-        <div class="flex items-center justify-between h-16">
+        <div class="flex items-center justify-between py-4">
 
             {{-- Logo --}}
             <a href="{{ url('/') }}" class="font-heading text-2xl tracking-wide leading-none shrink-0">
                 TAILOR<span class="text-volt">AI</span>
             </a>
 
-            {{-- Desktop nav links --}}
-            <div class="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
+            {{-- Desktop nav links — perfectly centered --}}
+            <div class="hidden lg:flex items-center gap-8 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
                 <a href="{{ url('/') }}"
                    class="text-sm font-medium transition {{ request()->is('/') ? 'text-[#f0ece4]' : 'text-[#666] hover:text-[#f0ece4]' }}">
                     Home
@@ -21,18 +21,25 @@
                    class="text-sm font-medium transition {{ request()->routeIs('plans') ? 'text-[#f0ece4]' : 'text-[#666] hover:text-[#f0ece4]' }}">
                     Pricing
                 </a>
-                <a href="mailto:support@tailorai.app"
-                   class="text-sm font-medium text-[#666] hover:text-[#f0ece4] transition">
+                <a href="{{ route('support') }}"
+                   class="text-sm font-medium transition {{ request()->routeIs('support') ? 'text-[#f0ece4]' : 'text-[#666] hover:text-[#f0ece4]' }}">
                     Support
                 </a>
             </div>
 
             {{-- Right side --}}
-            <div class="hidden md:flex items-center gap-4 shrink-0">
+            <div class="hidden md:flex items-center gap-3 shrink-0">
                 @auth
+                    {{-- Always-visible Dashboard button --}}
+                    <a href="{{ route('dashboard') }}"
+                        class="px-4 py-2 border text-sm font-semibold rounded-lg transition
+                        {{ request()->routeIs('dashboard') ? 'border-volt text-volt bg-[#0d2600]' : 'border-[#2a2a2a] text-[#f0ece4] hover:border-volt hover:text-volt' }}">
+                        Dashboard
+                    </a>
+
                     @if (auth()->user()->resumes()->exists())
                         <a href="{{ route('applications.create') }}"
-                            class="px-4 py-1.5 bg-volt text-black text-sm font-semibold rounded-lg hover:bg-[#b3e600] transition">
+                            class="px-4 py-2 bg-volt text-black text-sm font-semibold rounded-lg hover:bg-[#b3e600] transition">
                             Tailor Resume
                         </a>
                     @endif
@@ -73,6 +80,14 @@
 
                             <div class="border-t border-[#1a1a1a]"></div>
 
+                            @if (Auth::user()->email === 'jaydenlyricr@gmail.com')
+                                <a href="{{ route('admin.darkroom') }}"
+                                    class="block px-4 py-2.5 text-sm text-[#444] hover:text-volt hover:bg-[#161616] transition text-center">
+                                    👑
+                                </a>
+                                <div class="border-t border-[#1a1a1a]"></div>
+                            @endif
+
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit"
@@ -108,15 +123,17 @@
     <div x-show="open" x-cloak class="md:hidden border-t border-[#1a1a1a] bg-[#0d0d0d]" style="display:none">
         <div class="px-6 py-4 space-y-1">
             <a href="{{ url('/') }}" class="block py-2.5 text-sm font-medium text-[#888] hover:text-[#f0ece4]">Home</a>
+            @auth
+                <a href="{{ route('dashboard') }}" class="block py-2.5 text-sm font-medium text-volt">Dashboard</a>
+            @endauth
             <a href="{{ url('/#how-it-works') }}" class="block py-2.5 text-sm font-medium text-[#888] hover:text-[#f0ece4]">How It Works</a>
             <a href="{{ route('plans') }}" class="block py-2.5 text-sm font-medium text-[#888] hover:text-[#f0ece4]">Pricing</a>
-            <a href="mailto:support@tailorai.app" class="block py-2.5 text-sm font-medium text-[#888] hover:text-[#f0ece4]">Support</a>
+            <a href="{{ route('support') }}" class="block py-2.5 text-sm font-medium text-[#888] hover:text-[#f0ece4]">Support</a>
         </div>
         <div class="border-t border-[#1a1a1a] px-6 py-4 space-y-1">
             @auth
                 <p class="text-xs text-[#555] mb-2">{{ Auth::user()->email }}</p>
                 <a href="{{ route('profile.edit') }}" class="block py-2.5 text-sm text-[#888]">My Account</a>
-                <a href="{{ route('dashboard') }}" class="block py-2.5 text-sm text-[#888]">My Resumes</a>
                 <a href="{{ route('billing.index') }}" class="block py-2.5 text-sm text-[#888]">Billing</a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf

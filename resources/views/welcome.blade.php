@@ -203,7 +203,7 @@
                     <a href="{{ url('/') }}" class="text-[#666] hover:text-[#f0ece4] transition">Home</a>
                     <a href="{{ url('/#how-it-works') }}" class="text-[#666] hover:text-[#f0ece4] transition">How It Works</a>
                     <a href="{{ route('plans') }}" class="text-[#666] hover:text-[#f0ece4] transition">Pricing</a>
-                    <a href="mailto:support@tailorai.app" class="text-[#666] hover:text-[#f0ece4] transition">Support</a>
+                    <a href="{{ route('support') }}" class="text-[#666] hover:text-[#f0ece4] transition">Support</a>
                     @guest
                         <a href="{{ route('login') }}" class="text-[#666] hover:text-[#f0ece4] transition">Log in</a>
                     @endguest

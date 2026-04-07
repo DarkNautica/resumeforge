@@ -1,15 +1,19 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\JobApplicationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResumeController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\SupportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/support', [SupportController::class, 'index'])->name('support');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', function () {
@@ -40,5 +44,10 @@ Route::middleware('auth')->group(function () {
 
 // Stripe webhook — no auth, no CSRF
 Route::post('/stripe/webhook', [SubscriptionController::class, 'webhook'])->name('stripe.webhook');
+
+// Owner-only admin panel
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/darkroom', [AdminController::class, 'darkroom'])->name('admin.darkroom');
+});
 
 require __DIR__.'/auth.php';
