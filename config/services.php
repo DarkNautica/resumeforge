@@ -39,4 +39,12 @@ return [
         'key' => env('ANTHROPIC_API_KEY'),
     ],
 
+    'stripe' => [
+        'key'                   => env('STRIPE_KEY'),
+        'secret'                => env('STRIPE_SECRET'),
+        'webhook_secret'        => env('STRIPE_WEBHOOK_SECRET'),
+        'credit_price_id'       => env('STRIPE_CREDIT_PRICE_ID'),
+        'subscription_price_id' => env('STRIPE_SUBSCRIPTION_PRICE_ID'),
+    ],
+
 ];

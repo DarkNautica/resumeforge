@@ -21,6 +21,12 @@ class JobApplicationController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        // Paywall: require active subscription or at least one credit
+        if (! $request->user()->hasAccess()) {
+            return redirect()->route('plans')
+                ->with('warning', 'You need credits to tailor a resume.');
+        }
+
         $validated = $request->validate([
             'resume_id'       => 'required|exists:resumes,id',
             'job_title'       => 'required|string|max:255',
@@ -112,6 +118,11 @@ PROMPT;
                 'cover_letter'    => $parsed['cover_letter'],
                 'status'          => 'complete',
             ]);
+
+            // Deduct one credit for pay-per-use users
+            if (! $request->user()->isSubscribed()) {
+                $request->user()->decrement('tailor_credits');
+            }
         } catch (\Throwable $e) {
             \Log::error('TailorAI generation failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             $application->update(['status' => 'failed']);

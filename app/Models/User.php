@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'tailor_credits', 'subscription_status', 'stripe_customer_id'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -22,8 +22,19 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
+            'tailor_credits'    => 'integer',
         ];
+    }
+
+    public function isSubscribed(): bool
+    {
+        return $this->subscription_status === 'active';
+    }
+
+    public function hasAccess(): bool
+    {
+        return $this->isSubscribed() || $this->tailor_credits > 0;
     }
 
     public function resumes(): HasMany

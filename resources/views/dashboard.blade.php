@@ -9,13 +9,27 @@
                     YOUR <span class="text-volt">WORKSPACE</span>
                 </h1>
             </div>
-            <a href="{{ route('resumes.create') }}"
-                class="inline-flex items-center gap-2 px-5 py-2.5 bg-volt text-black text-sm font-semibold rounded-lg hover:bg-[#b3e600] transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
-                </svg>
-                New Resume
-            </a>
+            <div class="flex items-center gap-3">
+                {{-- Access status badge --}}
+                @if (auth()->user()->isSubscribed())
+                    <a href="{{ route('plans') }}"
+                        class="px-3 py-1.5 bg-[#0d2600] border border-[#1a4a00] text-volt text-xs font-semibold rounded-lg">
+                        Unlimited
+                    </a>
+                @else
+                    <a href="{{ route('plans') }}"
+                        class="px-3 py-1.5 bg-[#111] border border-[#1f1f1f] text-[#555] text-xs font-medium rounded-lg hover:border-volt hover:text-volt transition">
+                        {{ auth()->user()->tailor_credits }} credit{{ auth()->user()->tailor_credits !== 1 ? 's' : '' }}
+                    </a>
+                @endif
+                <a href="{{ route('resumes.create') }}"
+                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-volt text-black text-sm font-semibold rounded-lg hover:bg-[#b3e600] transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    New Resume
+                </a>
+            </div>
         </div>
 
         @if (session('success'))
