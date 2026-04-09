@@ -38,7 +38,7 @@
                 @auth
                     @if (auth()->user()->resumes()->exists())
                         <a href="{{ route('applications.create') }}"
-                            class="px-4 py-2 bg-volt text-black text-sm font-semibold rounded-lg hover:bg-[#b3e600] transition">
+                            class="px-4 py-2 bg-volt text-black text-sm font-semibold rounded-lg hover:bg-[#b3e600] transition animate-glow-pulse">
                             Tailor Resume
                         </a>
                     @endif

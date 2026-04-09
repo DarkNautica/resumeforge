@@ -108,7 +108,7 @@
             </div>
 
             {{-- RIGHT CARD: Unlimited ──────────────────────────────────── --}}
-            <div class="bg-[#111] border-2 border-[#C8FF00] rounded-2xl p-8 flex flex-col relative shadow-[0_0_60px_rgba(200,255,0,0.15)]">
+            <div class="bg-[#111] border-2 border-[#C8FF00] rounded-2xl p-8 flex flex-col relative animate-border-glow">
 
                 {{-- MOST POPULAR badge --}}
                 <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#C8FF00] text-black text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wider whitespace-nowrap">

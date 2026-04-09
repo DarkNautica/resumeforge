@@ -10,7 +10,7 @@
         <div class="relative max-w-5xl mx-auto px-6 pt-24 pb-20 text-center">
 
             {{-- Eyebrow social proof --}}
-            <div class="inline-flex items-center gap-3 mb-10 px-4 py-2 bg-[#111] border border-[#1f1f1f] rounded-full">
+            <div class="inline-flex items-center gap-3 mb-10 px-4 py-2 bg-[#111] border border-[#1f1f1f] rounded-full animate-float">
                 <span class="flex h-2 w-2 relative">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-volt opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-2 w-2 bg-volt"></span>
@@ -23,7 +23,20 @@
             {{-- Headline --}}
             <h1 class="font-heading text-white leading-[0.9]" style="font-size: clamp(56px, 11vw, 120px);">
                 LAND YOUR NEXT JOB<br>
-                <span class="text-volt">FASTER.</span>
+                <span x-data="{
+                    text: '',
+                    full: 'FASTER.',
+                    init() {
+                        let i = 0;
+                        const type = () => {
+                            if (i < this.full.length) {
+                                this.text += this.full[i++];
+                                setTimeout(type, 80);
+                            }
+                        }
+                        setTimeout(type, 600);
+                    }
+                }" x-text="text" class="text-volt"></span>
             </h1>
 
             {{-- Subhead --}}

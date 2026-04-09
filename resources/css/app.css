@@ -74,3 +74,77 @@
         color: #f0ece4;
     }
 }
+
+/* ── Focus glow for all inputs ────────────────────────── */
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="tel"]:focus,
+input[type="url"]:focus,
+input[type="search"]:focus,
+input[type="date"]:focus,
+textarea:focus,
+select:focus {
+    border-color: #C8FF00;
+    box-shadow: 0 0 0 3px rgba(200, 255, 0, 0.1);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* ── Custom keyframe animations ───────────────────────── */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+@keyframes confettiFall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+@keyframes glowPulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(200, 255, 0, 0.3); }
+    50% { box-shadow: 0 0 20px rgba(200, 255, 0, 0.5); }
+}
+
+@keyframes borderGlow {
+    0%, 100% { box-shadow: 0 0 30px rgba(200, 255, 0, 0.1); }
+    50% { box-shadow: 0 0 60px rgba(200, 255, 0, 0.25); }
+}
+
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+.animate-glow-pulse {
+    animation: glowPulse 2s ease-in-out infinite;
+}
+
+.animate-border-glow {
+    animation: borderGlow 2s ease-in-out infinite;
+}
+
+/* Template card shimmer on hover */
+.template-card {
+    position: relative;
+    overflow: hidden;
+}
+.template-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+    transform: translateX(-100%);
+    pointer-events: none;
+}
+.template-card:hover::after {
+    animation: shimmer 0.6s ease-in-out;
+}

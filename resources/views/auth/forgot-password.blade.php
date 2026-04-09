@@ -1,25 +1,62 @@
-<x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Reset Password - TailorAI</title>
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=bebas-neue:400" rel="stylesheet" />
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+<body class="bg-[#0a0a0a] antialiased">
+
+<div class="min-h-screen flex items-center justify-center px-4">
+    <div class="bg-[#111] border border-[#222] rounded-2xl p-8 w-full max-w-md mx-auto">
+
+        {{-- Logo --}}
+        <div class="text-center mb-8">
+            <a href="{{ url('/') }}" class="font-['Bebas_Neue'] text-3xl tracking-wide leading-none">
+                TAILOR<span class="text-[#C8FF00]">AI</span>
+            </a>
+        </div>
+
+        {{-- Header --}}
+        <h1 class="font-['Bebas_Neue'] text-[32px] text-white text-center leading-none tracking-wide">RESET PASSWORD</h1>
+        <p class="text-[#666] text-sm text-center mt-2 mb-8">Enter your email and we'll send you a reset link</p>
+
+        {{-- Session Status --}}
+        @if (session('status'))
+            <div class="mb-4 text-sm text-[#C8FF00]">{{ session('status') }}</div>
+        @endif
+
+        <form method="POST" action="{{ route('password.email') }}">
+            @csrf
+
+            {{-- Email --}}
+            <div class="mb-6">
+                <label for="email" class="block text-[#888] text-sm font-medium mb-1">Email</label>
+                <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus
+                    class="bg-[#1a1a1a] border border-[#222] text-white rounded-xl px-4 py-3 w-full focus:border-[#C8FF00] focus:outline-none placeholder-[#444]">
+                @error('email')
+                    <p class="text-red-400 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            {{-- Submit --}}
+            <button type="submit"
+                class="w-full bg-[#C8FF00] text-black font-bold py-3 rounded-xl hover:bg-[#d4ff00] transition">
+                Send Reset Link
+            </button>
+        </form>
+
+        {{-- Login link --}}
+        <p class="text-center text-sm text-[#666] mt-6">
+            Remember your password?
+            <a href="{{ route('login') }}" class="text-[#C8FF00] hover:underline">Sign in &rarr;</a>
+        </p>
     </div>
+</div>
 
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
-
-    <form method="POST" action="{{ route('password.email') }}">
-        @csrf
-
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Email Password Reset Link') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+</body>
+</html>

@@ -30,7 +30,30 @@
                         default      => 'bg-[#111] text-[#555] border border-[#2a2a2a]',
                     };
                 @endphp
-                <span class="inline-block px-3 py-1 rounded-lg text-xs font-semibold {{ $badgeClass }}">
+                <span class="inline-block px-3 py-1 rounded-lg text-xs font-semibold {{ $badgeClass }}"
+                    @if($application->status === 'complete')
+                    x-data x-init="
+                        const colors = ['#C8FF00', '#ffffff', '#4ade80'];
+                        for (let i = 0; i < 60; i++) {
+                            const el = document.createElement('div');
+                            el.style.cssText = `
+                                position: fixed;
+                                width: ${Math.random() * 8 + 4}px;
+                                height: ${Math.random() * 8 + 4}px;
+                                background: ${colors[Math.floor(Math.random() * colors.length)]};
+                                left: ${Math.random() * 100}vw;
+                                top: -10px;
+                                border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+                                animation: confettiFall ${Math.random() * 2 + 1.5}s ease-in forwards;
+                                animation-delay: ${Math.random() * 0.5}s;
+                                z-index: 9999;
+                            `;
+                            document.body.appendChild(el);
+                            setTimeout(() => el.remove(), 3000);
+                        }
+                    "
+                    @endif
+                >
                     {{ ucfirst($application->status) }}
                 </span>
             </div>
@@ -87,7 +110,7 @@
                                     {{-- ─── EXECUTIVE ─────────────────────────── --}}
                                     <a href="{{ route('applications.pdf', $application) }}?template=executive"
                                         @click="pdfLoading = true; setTimeout(() => pdfLoading = false, 15000)"
-                                        class="group block cursor-pointer rounded-xl overflow-hidden border border-[#2a2a2a] hover:border-[#C8FF00] transition-all"
+                                        class="template-card group block cursor-pointer rounded-xl overflow-hidden border border-[#2a2a2a] hover:border-[#C8FF00] hover:scale-105 transition-all duration-200"
                                         style="box-shadow: 0 0 0 0 rgba(200,255,0,0);"
                                         onmouseover="this.style.boxShadow='0 0 24px rgba(200,255,0,0.2)'"
                                         onmouseout="this.style.boxShadow='0 0 0 0 rgba(200,255,0,0)'">
@@ -115,7 +138,7 @@
                                     {{-- ─── MODERN ────────────────────────────── --}}
                                     <a href="{{ route('applications.pdf', $application) }}?template=modern"
                                         @click="pdfLoading = true; setTimeout(() => pdfLoading = false, 15000)"
-                                        class="group block cursor-pointer rounded-xl overflow-hidden border border-[#2a2a2a] hover:border-[#C8FF00] transition-all transform hover:scale-[1.03]">
+                                        class="template-card group block cursor-pointer rounded-xl overflow-hidden border border-[#2a2a2a] hover:border-[#C8FF00] hover:scale-105 transition-all duration-200">
                                         {{-- Mockup --}}
                                         <div class="bg-white p-3 h-24 flex flex-col gap-1.5">
                                             <p class="text-[#0f172a] font-bold leading-none" style="font-size: 18px; letter-spacing: -0.5px;">M</p>
@@ -134,7 +157,7 @@
                                     {{-- ─── CLASSIC ───────────────────────────── --}}
                                     <a href="{{ route('applications.pdf', $application) }}?template=classic"
                                         @click="pdfLoading = true; setTimeout(() => pdfLoading = false, 15000)"
-                                        class="group block cursor-pointer rounded-xl overflow-hidden border border-[#2a2a2a] hover:border-[#888] transition-all">
+                                        class="template-card group block cursor-pointer rounded-xl overflow-hidden border border-[#2a2a2a] hover:border-[#888] hover:scale-105 transition-all duration-200">
                                         {{-- Mockup --}}
                                         <div class="bg-[#f8f8f8] p-3 h-24 flex flex-col items-center gap-1">
                                             <div class="h-1 w-2/3 bg-black rounded-full mt-0.5"></div>
@@ -202,9 +225,10 @@
                                     <div class="flex items-center justify-center gap-6 sm:gap-10">
 
                                         {{-- BEFORE --}}
-                                        <div class="flex flex-col items-center">
+                                        <div class="flex flex-col items-center"
+                                             x-data="{ displayed: 0, target: {{ $orig }}, init() { const d=1500,s=60,inc=this.target/s; let c=0; const t=setInterval(()=>{ c+=inc; if(c>=this.target){this.displayed=this.target;clearInterval(t)}else{this.displayed=Math.floor(c)} },d/s); } }">
                                             <p class="font-heading leading-none" style="font-size: 56px; color: {{ $origColor }};">
-                                                {{ $orig }}<span style="font-size: 26px;">%</span>
+                                                <span x-text="displayed"></span><span style="font-size: 26px;">%</span>
                                             </p>
                                             <p class="text-[10px] font-bold text-[#555] uppercase tracking-widest mt-2">Before</p>
                                             <p class="text-[10px] text-[#444] mt-0.5">Original</p>
@@ -218,9 +242,10 @@
                                         </div>
 
                                         {{-- AFTER --}}
-                                        <div class="flex flex-col items-center">
+                                        <div class="flex flex-col items-center"
+                                             x-data="{ displayed: 0, target: {{ $tail }}, init() { const d=1500,s=60,inc=this.target/s; let c=0; const t=setInterval(()=>{ c+=inc; if(c>=this.target){this.displayed=this.target;clearInterval(t)}else{this.displayed=Math.floor(c)} },d/s); } }">
                                             <p class="font-heading leading-none" style="font-size: 56px; color: {{ $tailColor }}; text-shadow: 0 0 20px rgba(200,255,0,0.3);">
-                                                {{ $tail }}<span style="font-size: 26px;">%</span>
+                                                <span x-text="displayed"></span><span style="font-size: 26px;">%</span>
                                             </p>
                                             <p class="text-[10px] font-bold text-volt uppercase tracking-widest mt-2">After</p>
                                             <p class="text-[10px] text-[#666] mt-0.5">Tailored</p>
@@ -231,8 +256,9 @@
                                     {{-- Improvement delta --}}
                                     @if ($delta > 0)
                                         <div class="mt-5 pt-5 border-t border-[#1a1a1a] text-center">
-                                            <p class="font-heading text-2xl text-volt leading-none mb-1">
-                                                +{{ $delta }} points
+                                            <p class="font-heading text-2xl text-volt leading-none mb-1"
+                                               x-data="{ displayed: 0, target: {{ $delta }}, init() { const d=1500,s=40,inc=this.target/s; let c=0; const t=setInterval(()=>{ c+=inc; if(c>=this.target){this.displayed=this.target;clearInterval(t)}else{this.displayed=Math.floor(c)} },d/s); } }">
+                                                +<span x-text="displayed"></span> points
                                             </p>
                                             <p class="text-xs text-[#666]">
                                                 {{ $application->match_label ?? 'Strong Match' }} — that's how much Claude improved your fit
@@ -266,8 +292,9 @@
                                 <div class="flex items-center gap-5 {{ $scoreBg }} border {{ $scoreBorder }} rounded-2xl p-5"
                                     title="Score reflects how well your tailored resume aligns with this job description.">
                                     <div class="w-20 h-20 rounded-full {{ $scoreBg }} border-2 {{ $scoreBorder }} flex items-center justify-center shrink-0">
-                                        <div class="text-center">
-                                            <p class="font-heading text-3xl {{ $scoreColor }} leading-none">{{ $score }}</p>
+                                        <div class="text-center"
+                                             x-data="{ displayed: 0, target: {{ $score }}, init() { const d=1500,s=60,inc=this.target/s; let c=0; const t=setInterval(()=>{ c+=inc; if(c>=this.target){this.displayed=this.target;clearInterval(t)}else{this.displayed=Math.floor(c)} },d/s); } }">
+                                            <p class="font-heading text-3xl {{ $scoreColor }} leading-none" x-text="displayed"></p>
                                             <p class="text-[8px] text-[#666] uppercase tracking-widest mt-0.5">Match</p>
                                         </div>
                                     </div>

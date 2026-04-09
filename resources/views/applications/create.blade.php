@@ -1,5 +1,26 @@
 <x-app-layout>
-    <div class="max-w-2xl mx-auto px-6 py-12">
+    <div class="max-w-2xl mx-auto px-6 py-12" x-data="{ loading: false }">
+
+        {{-- Loading overlay --}}
+        <div x-show="loading" x-cloak
+             style="display:none;"
+             class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/85">
+            <div class="bg-[#111] border border-[#222] rounded-2xl p-10 flex flex-col items-center gap-6 max-w-sm w-full mx-4">
+                <div class="relative w-20 h-20">
+                    <div class="absolute inset-0 rounded-full border-4 border-[#222]"></div>
+                    <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-[#C8FF00] animate-spin"></div>
+                </div>
+                <div class="text-center">
+                    <div class="font-['Bebas_Neue'] text-2xl text-white tracking-widest mb-2">TAILORING YOUR RESUME</div>
+                    <div class="text-[#888] text-sm">Claude is rewriting your resume and cover letter for this specific role. This takes 15–30 seconds.</div>
+                </div>
+                <div class="flex gap-1">
+                    <div class="w-2 h-2 rounded-full bg-[#C8FF00] animate-bounce" style="animation-delay: 0ms"></div>
+                    <div class="w-2 h-2 rounded-full bg-[#C8FF00] animate-bounce" style="animation-delay: 150ms"></div>
+                    <div class="w-2 h-2 rounded-full bg-[#C8FF00] animate-bounce" style="animation-delay: 300ms"></div>
+                </div>
+            </div>
+        </div>
 
         {{-- Page header --}}
         <div class="mb-10">
@@ -29,7 +50,7 @@
                 </a>
             </div>
         @else
-            <form method="POST" action="{{ route('applications.store') }}" class="space-y-4">
+            <form method="POST" action="{{ route('applications.store') }}" class="space-y-4" @submit="loading = true">
                 @csrf
 
                 @if ($errors->any())
@@ -107,11 +128,21 @@
                 <div class="flex items-center justify-end gap-4 pt-2">
                     <a href="{{ route('dashboard') }}" class="text-sm text-[#555] hover:text-[#f0ece4] transition">Cancel</a>
                     <button type="submit"
-                        class="inline-flex items-center gap-2 px-6 py-3 bg-volt text-black text-sm font-semibold rounded-lg hover:bg-[#b3e600] transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                        </svg>
-                        Tailor My Resume
+                        class="inline-flex items-center gap-2 px-6 py-3 bg-volt text-black text-sm font-semibold rounded-lg hover:bg-[#b3e600] transition"
+                        :disabled="loading"
+                        :class="loading ? 'opacity-80 cursor-wait' : ''">
+                        <template x-if="!loading">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </template>
+                        <template x-if="loading">
+                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                        </template>
+                        <span x-text="loading ? 'Tailoring…' : 'Tailor My Resume'"></span>
                     </button>
                 </div>
             </form>

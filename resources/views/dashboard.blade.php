@@ -162,7 +162,9 @@
                                 default      => 'bg-[#111] text-[#555] border border-[#2a2a2a]',
                             };
                         @endphp
-                        <div class="flex items-center justify-between px-5 py-4 {{ !$loop->last ? 'border-b border-[#1a1a1a]' : '' }} hover:bg-[#141414] transition">
+                        <div class="flex items-center justify-between px-5 py-4 {{ !$loop->last ? 'border-b border-[#1a1a1a]' : '' }} hover:bg-[#141414] transition opacity-0 translate-y-4"
+                             x-data x-init="setTimeout(() => { $el.classList.add('opacity-100', 'translate-y-0'); $el.classList.remove('opacity-0', 'translate-y-4'); }, {{ $loop->index * 100 }})"
+                             style="transition: opacity 0.5s ease, transform 0.5s ease;">
                             <div class="min-w-0 flex-1">
                                 <p class="font-medium text-[#f0ece4] truncate">
                                     {{ $app->job_title }}

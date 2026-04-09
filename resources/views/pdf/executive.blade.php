@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html style="background: #1a1a1a">
+<html style="background: #1a1a1a;">
 <head>
 <meta charset="utf-8">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { height: 100%; margin: 0; padding: 0; }
-body { font-family: Arial, Helvetica, sans-serif; font-size: 10px; color: #111827; background: #1a1a1a; }
+body { font-family: Arial, Helvetica, sans-serif; font-size: 10px; color: #111827; background: #1a1a1a; margin: 0; padding: 0; }
 
 .outer { width: 100%; border-collapse: collapse; table-layout: fixed; border: 0; }
 
@@ -34,7 +34,6 @@ body { font-family: Arial, Helvetica, sans-serif; font-size: 10px; color: #11182
 .exp-desc { font-size: 10px; color: #4b5563; line-height: 1.65; margin-top: 5px; }
 
 /* ── Cover letter ── */
-.cover-page { padding: 56px; background-color: #ffffff; page-break-before: always; }
 .cover-name { font-size: 22px; font-weight: bold; color: #111827; line-height: 1.2; letter-spacing: -0.3px; }
 .cover-contact { font-size: 9.5px; color: #6b7280; margin-top: 4px; }
 .cover-rule { border: none; border-top: 2px solid #4f46e5; width: 36px; margin: 16px 0 28px; padding: 0; height: 0; font-size: 0; }
@@ -42,7 +41,7 @@ body { font-family: Arial, Helvetica, sans-serif; font-size: 10px; color: #11182
 .cover-body { font-size: 10.5px; line-height: 1.75; color: #374151; margin-bottom: 14px; }
 </style>
 </head>
-<body style="background: #1a1a1a;">
+<body>
 
 <table class="outer" cellpadding="0" cellspacing="0" border="0">
 
@@ -82,6 +81,7 @@ body { font-family: Arial, Helvetica, sans-serif; font-size: 10px; color: #11182
 </td>
 
 <td class="main" valign="top">
+<div style="background: #ffffff; min-height: 100%;">
 <div class="main-name">{{ $resume['full_name'] ?? $application->resume->full_name ?? '' }}</div>
 
 @if($resume['summary'] ?? null)
@@ -106,13 +106,16 @@ body { font-family: Arial, Helvetica, sans-serif; font-size: 10px; color: #11182
 </div>
 @endforeach
 @endif
+</div>
 </td>
 
 </tr>
 </table>
 
 @if($coverLetter)
-<div class="cover-page">
+<table cellpadding="0" cellspacing="0" border="0" style="width: 100%; min-height: 1000px; background: #ffffff; page-break-before: always;">
+<tr>
+<td valign="top" style="background: #ffffff; padding: 56px;">
 <div class="cover-name">{{ $resume['full_name'] ?? $application->resume->full_name }}</div>
 <div class="cover-contact">{{ $resume['email'] ?? $application->resume->email }} · {{ $resume['phone'] ?? $application->resume->phone }} · {{ $resume['location'] ?? $application->resume->location }}</div>
 <hr class="cover-rule">
@@ -122,7 +125,9 @@ body { font-family: Arial, Helvetica, sans-serif; font-size: 10px; color: #11182
 <div class="cover-body">{{ trim($paragraph) }}</div>
 @endif
 @endforeach
-</div>
+</td>
+</tr>
+</table>
 @endif
 
 </body>
