@@ -61,6 +61,21 @@ class JobApplicationController extends Controller
             'status'          => 'processing',
         ]);
 
+        // ─── Score the ORIGINAL base resume against the job (before tailoring) ──
+        // Fully isolated: any failure here (API error, DB column missing, etc.) MUST NOT
+        // block the main generation. If this throws, we just skip the original score.
+        try {
+            $originalScoreData = $this->scoreResumeAgainstJob(
+                $resume->only(['full_name', 'summary', 'work_experience', 'education', 'skills']),
+                $validated['job_description']
+            );
+            if ($originalScoreData) {
+                $application->update(['original_score' => $originalScoreData['score']]);
+            }
+        } catch (\Throwable $e) {
+            \Log::warning('Original score skipped: ' . $e->getMessage());
+        }
+
         try {
             $systemPrompt = <<<PROMPT
 You are an expert resume writer and career coach. Your job is to tailor a candidate's resume specifically for a job posting and write a matching cover letter.
@@ -123,11 +138,18 @@ PROMPT;
 
             \Log::info('Claude content.0.text', ['value' => $rawText]);
 
-            // Strip accidental markdown code fences if Claude wraps the response
-            $rawText = preg_replace('/^```(?:json)?\s*/i', '', trim($rawText));
-            $rawText = preg_replace('/\s*```$/', '', $rawText);
+            // Strip markdown code fences before parsing
+            $rawText = preg_replace('/^```(?:json)?\s*|\s*```$/s', '', trim($rawText));
 
-            $parsed = json_decode(trim($rawText), true);
+            $parsed = $this->extractJsonObject($rawText);
+
+            // Guard: if Claude returned malformed JSON, surface a useful error
+            if (! is_array($parsed) || ! isset($parsed['tailored_resume'], $parsed['cover_letter'])) {
+                throw new \RuntimeException(
+                    'Claude returned malformed JSON. HTTP ' . $response->status()
+                    . ' · Body preview: ' . substr((string) $rawText, 0, 300)
+                );
+            }
 
             $application->update([
                 'tailored_resume' => $parsed['tailored_resume'],
@@ -135,38 +157,21 @@ PROMPT;
                 'status'          => 'complete',
             ]);
 
-            // ─── Match score (Haiku — fast & cheap, ~$0.001/call) ──
+            // ─── Score the TAILORED resume against the job ──
+            // Isolated so a scoring failure never breaks the completed application.
             try {
-                $scoreResponse = Http::withHeaders([
-                    'x-api-key'         => config('services.anthropic.key'),
-                    'anthropic-version' => '2023-06-01',
-                    'content-type'      => 'application/json',
-                ])->post('https://api.anthropic.com/v1/messages', [
-                    'model'      => 'claude-haiku-4-5-20251001',
-                    'max_tokens' => 100,
-                    'messages'   => [[
-                        'role'    => 'user',
-                        'content' => 'Rate how well this resume matches this job description from 1-100. Return only a JSON object like {"score": 87, "label": "Strong Match"}. Resume: '
-                            . json_encode($parsed['tailored_resume'])
-                            . ' Job: '
-                            . substr($validated['job_description'], 0, 500),
-                    ]],
-                ]);
-
-                $rawScore = $scoreResponse->json('content.0.text');
-                $rawScore = preg_replace('/^```(?:json)?\s*/i', '', trim((string) $rawScore));
-                $rawScore = preg_replace('/\s*```$/', '', $rawScore);
-                $scoreData = json_decode(trim($rawScore), true);
-
-                if (is_array($scoreData) && isset($scoreData['score'])) {
+                $tailoredScoreData = $this->scoreResumeAgainstJob(
+                    $parsed['tailored_resume'],
+                    $validated['job_description']
+                );
+                if ($tailoredScoreData) {
                     $application->update([
-                        'match_score' => max(1, min(100, (int) $scoreData['score'])),
-                        'match_label' => $scoreData['label'] ?? null,
+                        'match_score' => $tailoredScoreData['score'],
+                        'match_label' => $tailoredScoreData['label'] ?? null,
                     ]);
                 }
             } catch (\Throwable $e) {
-                \Log::warning('Match score generation failed', ['error' => $e->getMessage()]);
-                // Non-fatal — application still completes without a score
+                \Log::warning('Tailored score skipped: ' . $e->getMessage());
             }
 
             // Deduct one credit for pay-per-use users
@@ -174,7 +179,12 @@ PROMPT;
                 $request->user()->decrement('tailor_credits');
             }
         } catch (\Throwable $e) {
-            \Log::error('TailorAI generation failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            \Log::error('TailorAI generation failed: ' . $e->getMessage(), [
+                'application_id' => $application->id,
+                'user_id'        => $request->user()->id,
+                'file'           => $e->getFile() . ':' . $e->getLine(),
+                'trace'          => $e->getTraceAsString(),
+            ]);
             $application->update(['status' => 'failed']);
         }
 
@@ -243,6 +253,83 @@ PROMPT;
     }
 
     /**
+     * Robustly extract a JSON object from a Claude response that may contain
+     * leading prose, trailing prose, and/or markdown code fences.
+     * Returns the decoded array or null if no valid JSON object can be parsed.
+     */
+    private function extractJsonObject(?string $text): ?array
+    {
+        if (! is_string($text) || trim($text) === '') {
+            return null;
+        }
+
+        // 1) Try a fenced ```json ... ``` block first (most common case)
+        if (preg_match('/```(?:json)?\s*(\{.*?\})\s*```/s', $text, $m)) {
+            $decoded = json_decode($m[1], true);
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+        }
+
+        // 2) Fallback: greedy match from the first { to the last } in the string
+        $start = strpos($text, '{');
+        $end   = strrpos($text, '}');
+        if ($start !== false && $end !== false && $end > $start) {
+            $candidate = substr($text, $start, $end - $start + 1);
+            $decoded = json_decode($candidate, true);
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+        }
+
+        // 3) Last resort: try the whole string as-is
+        $decoded = json_decode(trim($text), true);
+        return is_array($decoded) ? $decoded : null;
+    }
+
+    /**
+     * Score a resume against a job description using Claude Haiku.
+     * Returns ['score' => int 1-100, 'label' => string|null] or null on failure.
+     * Non-fatal — caller can ignore null.
+     */
+    private function scoreResumeAgainstJob(array $resumeData, string $jobDescription): ?array
+    {
+        try {
+            $response = Http::withHeaders([
+                'x-api-key'         => config('services.anthropic.key'),
+                'anthropic-version' => '2023-06-01',
+                'content-type'      => 'application/json',
+            ])->post('https://api.anthropic.com/v1/messages', [
+                'model'      => 'claude-haiku-4-5-20251001',
+                'max_tokens' => 100,
+                'messages'   => [[
+                    'role'    => 'user',
+                    'content' => 'Rate how well this resume matches this job description from 1-100. Return only a JSON object like {"score": 87, "label": "Strong Match"}. Resume: '
+                        . json_encode($resumeData)
+                        . ' Job: '
+                        . substr($jobDescription, 0, 500),
+                ]],
+            ]);
+
+            $raw = $response->json('content.0.text');
+            $clean = preg_replace('/^```(?:json)?\s*|\s*```$/s', '', trim($raw));
+            $data = $this->extractJsonObject($clean);
+
+            if (! is_array($data) || ! isset($data['score'])) {
+                return null;
+            }
+
+            return [
+                'score' => max(1, min(100, (int) $data['score'])),
+                'label' => $data['label'] ?? null,
+            ];
+        } catch (\Throwable $e) {
+            \Log::warning('Match score generation failed', ['error' => $e->getMessage()]);
+            return null;
+        }
+    }
+
+    /**
      * Run a Claude polish pass on the stored resume + cover letter.
      * Returns the cleaned version, or the original input on any failure.
      */
@@ -279,15 +366,7 @@ PROMPT;
             }
 
             $rawText = $response->json('content.0.text');
-            if (! is_string($rawText)) {
-                return $fallback;
-            }
-
-            // Strip accidental markdown code fences
-            $rawText = preg_replace('/^```(?:json)?\s*/i', '', trim($rawText));
-            $rawText = preg_replace('/\s*```$/', '', $rawText);
-
-            $parsed = json_decode(trim($rawText), true);
+            $parsed  = $this->extractJsonObject($rawText);
 
             if (! is_array($parsed)
                 || ! isset($parsed['tailored_resume'], $parsed['cover_letter'])

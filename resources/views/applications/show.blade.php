@@ -181,8 +181,72 @@
 
                         <div class="p-7 space-y-6" x-data="{ showOriginal: false }">
 
-                            {{-- ─── Match Score badge ───────────────── --}}
-                            @if ($application->match_score)
+                            {{-- ─── Before / After Score Comparison ─────────── --}}
+                            @if ($application->match_score && $application->original_score)
+                                @php
+                                    $orig = $application->original_score;
+                                    $tail = $application->match_score;
+                                    $delta = $tail - $orig;
+
+                                    // Color the original score by tier (low = red, mid = yellow)
+                                    $origColor = $orig < 60 ? '#ff5555' : ($orig < 80 ? '#ffcc00' : '#C8FF00');
+                                    // Tailored score is always shown in volt for the conversion moment
+                                    $tailColor = '#C8FF00';
+                                @endphp
+
+                                <div class="bg-[#0d0d0d] border border-[#1f1f1f] rounded-2xl p-6">
+                                    <p class="text-[10px] font-semibold text-[#555] uppercase tracking-widest text-center mb-5">
+                                        Job Match Score
+                                    </p>
+
+                                    <div class="flex items-center justify-center gap-6 sm:gap-10">
+
+                                        {{-- BEFORE --}}
+                                        <div class="flex flex-col items-center">
+                                            <p class="font-heading leading-none" style="font-size: 56px; color: {{ $origColor }};">
+                                                {{ $orig }}<span style="font-size: 26px;">%</span>
+                                            </p>
+                                            <p class="text-[10px] font-bold text-[#555] uppercase tracking-widest mt-2">Before</p>
+                                            <p class="text-[10px] text-[#444] mt-0.5">Original</p>
+                                        </div>
+
+                                        {{-- Arrow --}}
+                                        <div class="flex flex-col items-center pb-7">
+                                            <svg class="w-10 h-10 sm:w-12 sm:h-12 text-volt" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                                            </svg>
+                                        </div>
+
+                                        {{-- AFTER --}}
+                                        <div class="flex flex-col items-center">
+                                            <p class="font-heading leading-none" style="font-size: 56px; color: {{ $tailColor }}; text-shadow: 0 0 20px rgba(200,255,0,0.3);">
+                                                {{ $tail }}<span style="font-size: 26px;">%</span>
+                                            </p>
+                                            <p class="text-[10px] font-bold text-volt uppercase tracking-widest mt-2">After</p>
+                                            <p class="text-[10px] text-[#666] mt-0.5">Tailored</p>
+                                        </div>
+
+                                    </div>
+
+                                    {{-- Improvement delta --}}
+                                    @if ($delta > 0)
+                                        <div class="mt-5 pt-5 border-t border-[#1a1a1a] text-center">
+                                            <p class="font-heading text-2xl text-volt leading-none mb-1">
+                                                +{{ $delta }} points
+                                            </p>
+                                            <p class="text-xs text-[#666]">
+                                                {{ $application->match_label ?? 'Strong Match' }} — that's how much Claude improved your fit
+                                            </p>
+                                        </div>
+                                    @elseif ($delta === 0)
+                                        <div class="mt-5 pt-5 border-t border-[#1a1a1a] text-center">
+                                            <p class="text-xs text-[#666]">Your original resume was already a great match.</p>
+                                        </div>
+                                    @endif
+                                </div>
+
+                            {{-- Fallback: only the tailored score is available --}}
+                            @elseif ($application->match_score)
                                 @php
                                     $score = $application->match_score;
                                     if ($score >= 80) {
@@ -201,9 +265,7 @@
                                 @endphp
                                 <div class="flex items-center gap-5 {{ $scoreBg }} border {{ $scoreBorder }} rounded-2xl p-5"
                                     title="Score reflects how well your tailored resume aligns with this job description.">
-                                    {{-- Circular score --}}
-                                    <div class="w-20 h-20 rounded-full {{ $scoreBg }} border-2 {{ $scoreBorder }} flex items-center justify-center shrink-0"
-                                         style="border-color: currentColor;">
+                                    <div class="w-20 h-20 rounded-full {{ $scoreBg }} border-2 {{ $scoreBorder }} flex items-center justify-center shrink-0">
                                         <div class="text-center">
                                             <p class="font-heading text-3xl {{ $scoreColor }} leading-none">{{ $score }}</p>
                                             <p class="text-[8px] text-[#666] uppercase tracking-widest mt-0.5">Match</p>

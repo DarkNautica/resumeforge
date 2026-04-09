@@ -19,6 +19,9 @@ Route::get('/support', [SupportController::class, 'index'])->name('support');
 Route::view('/privacy', 'legal.privacy')->name('legal.privacy');
 Route::view('/terms', 'legal.terms')->name('legal.terms');
 
+// Pricing — visible to guests
+Route::get('/plans', [SubscriptionController::class, 'plans'])->name('plans');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', function () {
         $resumes = auth()->user()->resumes()->orderByDesc('created_at')->get();
@@ -32,7 +35,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/applications/{application}/pdf', [JobApplicationController::class, 'downloadPdf'])->name('applications.pdf');
 
     // Billing
-    Route::get('/plans', [SubscriptionController::class, 'plans'])->name('plans');
     Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
     Route::post('/billing/credit', [SubscriptionController::class, 'buyCredit'])->name('billing.credit');
     Route::post('/billing/subscribe', [SubscriptionController::class, 'subscribe'])->name('billing.subscribe');

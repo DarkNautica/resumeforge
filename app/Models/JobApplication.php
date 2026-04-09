@@ -21,11 +21,13 @@ class JobApplication extends Model
         'status',
         'match_score',
         'match_label',
+        'original_score',
     ];
 
     protected $casts = [
         'tailored_resume' => 'array',
         'match_score'     => 'integer',
+        'original_score'  => 'integer',
     ];
 
     public function user(): BelongsTo
